@@ -1,0 +1,294 @@
+--████████╗░█████╗░██████╗░██╗░░░░░███████╗░██████╗
+--╚══██╔══╝██╔══██╗██╔══██╗██║░░░░░██╔════╝██╔════╝
+--░░░██║░░░███████║██████╦╝██║░░░░░█████╗░░╚█████╗░
+--░░░██║░░░██╔══██║██╔══██╗██║░░░░░██╔══╝░░░╚═══██╗
+--░░░██║░░░██║░░██║██████╦╝███████╗███████╗██████╔╝
+--░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░╚══════╝╚══════╝╚═════╝░
+-- ==============================================================
+--█░█ █▀ █▀▀ █▀█ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▄█ ▄█ ██▄ █▀▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==============================================================
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,                 -- Unique auto-increment ID
+    email TEXT UNIQUE NOT NULL,            -- User email
+    password TEXT NOT NULL,                -- Hashed password
+    username TEXT UNIQUE NOT NULL,                         
+    created_at TIMESTAMPTZ DEFAULT NOW(),   -- User creation timestamp
+    avatar_url string NULL
+);
+
+-- ==============================================================
+--█▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==============================================================
+CREATE TABLE recipes (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    image TEXT NOT NULL,
+    likes INTEGER DEFAULT 0,
+    comments INTEGER DEFAULT 0,
+    shares INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    red_hearth BOOLEAN DEFAULT FALSE      -- Frontend flag
+);
+
+-- ==============================================================
+--█▀ ▄▀█ █░█ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--▄█ █▀█ ▀▄▀ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==============================================================
+CREATE TABLE saved_recipes (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (user_id, recipe_id)
+);
+
+-- ==============================================================
+--█▀▀ █░█ ▄▀█ ▀█▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▄▄ █▀█ █▀█ ░█░ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==============================================================
+CREATE TABLE chats (
+    chat_id SERIAL PRIMARY KEY,
+    is_group BOOLEAN DEFAULT FALSE,
+    name TEXT,                            -- Required for groups, optional for 1-to-1
+    created_at TIMESTAMPTZ DEFAULT NOW()
+    all_messages_deleted_at TIMESTAMPTZ DEFAULT NULL;
+);
+
+-- ================================================================
+--█▀▀ █░█ ▄▀█ ▀█▀   █▀▀ █▀█ █ █▀▀ █▄░█ █▀▄ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▄▄ █▀█ █▀█ ░█░   █▀░ █▀▄ █ ██▄ █░▀█ █▄▀ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ================================================================
+CREATE TABLE chat_friends (
+    user_id1 INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,             --my id
+    user_id2 INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,             --friend id
+    status TEXT NOT NULL DEFAULT 'accepted', -- 'pending', 'accepted', 'blocked'  --sin uso por el momento
+    requested_at TIMESTAMPTZ DEFAULT NOW(),                                       --sin uso por el momento
+    responded_at TIMESTAMPTZ DEFAULT NOW(),                                       --sin uso por el momento
+    PRIMARY KEY (user_id1, user_id2),
+    CHECK (user_id1 <> user_id2)
+);
+
+-- ==============================================================
+--█▀▀ █░█ ▄▀█ ▀█▀   █▀█ ▄▀█ █▀█ ▀█▀ █ █▀▀ █ █▀█ ▄▀█ █▄░█ ▀█▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▄▄ █▀█ █▀█ ░█░   █▀▀ █▀█ █▀▄ ░█░ █ █▄▄ █ █▀▀ █▀█ █░▀█ ░█░ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==============================================================
+CREATE TABLE chat_participants (
+    chat_id INTEGER NOT NULL REFERENCES chats(chat_id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (chat_id, user_id)
+);
+
+-- ==============================================================
+--█▀▄▀█ █▀▀ █▀ █▀ ▄▀█ █▀▀ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█░▀░█ ██▄ ▄█ ▄█ █▀█ █▄█ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==============================================================
+CREATE TABLE messages (
+    chat_id INTEGER BIGSERIAL NOT NULL REFERENCES chats(chat_id) ON DELETE CASCADE,
+    message_id INTEGER NOT NULL, -- message number within chat
+    sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    is_read BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (chat_id, message_id)
+);
+
+-- ==============================================================
+--█▀▄▀█ █▀▀ █▀ █▀ ▄▀█ █▀▀ █▀▀   █▀█ █▀▀ ▄▀█ █▀▄ █▀
+--█░▀░█ ██▄ ▄█ ▄█ █▀█ █▄█ ██▄   █▀▄ ██▄ █▀█ █▄▀ ▄█
+-- ==============================================================
+-- Track whether a message has been read by a participant
+--When a message is sent, all participants except the sender do not get a row in message_reads.
+--When a user opens a chat, you insert rows for all unread messages from that chat for that user → marking them as read.
+CREATE TABLE message_reads (
+    chat_id INTEGER NOT NULL,
+    message_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    read_at TIMESTAMPTZ DEFAULT now(),
+    PRIMARY KEY (chat_id, message_id, user_id),
+    FOREIGN KEY (chat_id, message_id) REFERENCES messages(chat_id, id) ON DELETE CASCADE
+);
+-- Index for performance
+--CREATE INDEX idx_message_reads_user ON message_reads(user_id);
+--CREATE INDEX idx_message_reads_message ON message_reads(message_id);
+
+
+--██╗███╗░░██╗░██████╗███████╗██████╗░████████╗
+--██║████╗░██║██╔════╝██╔════╝██╔══██╗╚══██╔══╝
+--██║██╔██╗██║╚█████╗░█████╗░░██████╔╝░░░██║░░░
+--██║██║╚████║░╚═══██╗██╔══╝░░██╔══██╗░░░██║░░░
+--██║██║░╚███║██████╔╝███████╗██║░░██║░░░██║░░░
+--╚═╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░░░╚═╝░░░
+-- ========================================
+--█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █░█ █▀ █▀▀ █▀█ █▀
+--█ █░▀█ ▄█ ██▄ █▀▄ ░█░   █▄█ ▄█ ██▄ █▀▄ ▄█
+-- ========================================
+INSERT INTO users (email, password, username)
+VALUES
+('isabella@example.com', 'hashed_pw_1', 'Isabella'),
+('ethan@example.com', 'hashed_pw_2', 'Ethan'),
+('olivia@example.com', 'hashed_pw_3', 'Olivia'),
+('noah@example.com', 'hashed_pw_4', 'Noah'),
+('hana@example.com', 'hashed_pw_5', 'Hana'),
+('amir@example.com', 'hashed_pw_6', 'Amir'),
+('sora@example.com', 'hashed_pw_7', 'Sora'),
+('arjun@example.com', 'hashed_pw_8', 'Arjun'),
+('maya@example.com', 'hashed_pw_9', 'Maya'),
+('diego@example.com', 'hashed_pw_10', 'Diego'),
+('camila@example.com', 'hashed_pw_11', 'Camila'),
+('nikos@example.com', 'hashed_pw_12', 'Nikos'),
+('linh@example.com', 'hashed_pw_13', 'Linh'),
+('sofia@example.com', 'hashed_pw_14', 'Sofia');
+
+-- ===============================================
+--█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀
+--█ █░▀█ ▄█ ██▄ █▀▄ ░█░   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█
+-- ===============================================
+INSERT INTO recipes (id, title, user_id, image, likes, comments, shares)
+VALUES
+(1, 'Mediterranean Quinoa Salad', 1, 'quinoa-salad.png', 234, 56, 34),
+(2, 'Spicy Thai Green Curry', 2, 'green-curry.png', 189, 42, 25),
+(3, 'Classic French Onion Soup', 3, 'onion-soup.png', 312, 78, 45),
+(4, 'Homemade Pasta Carbonara', 4, 'carbonara.png', 276, 65, 38),
+(5, 'Korean Bibimbap Bowl', 5, 'bibimbap.png', 198, 39, 27),
+(6, 'Moroccan Chickpea Tagine', 6, 'chickpea-tagine.png', 251, 44, 31),
+(7, 'Japanese Ramen Noodles', 7, 'ramen.png', 329, 81, 50),
+(8, 'Indian Butter Chicken', 8, 'butter-chicken.png', 288, 60, 42),
+(9, 'Vegan Avocado Toast', 9, 'avocado-toast.png', 172, 36, 20),
+(10, 'Argentinian Steak with Chimichurri', 10, 'chimichurri-steak.png', 310, 70, 47),
+(11, 'Peruvian Ceviche', 11, 'ceviche.png', 206, 49, 29),
+(12, 'Greek Moussaka', 12, 'moussaka.png', 239, 53, 33),
+(13, 'Vietnamese Pho', 13, 'pho.png', 297, 67, 41),
+(14, 'Mexican Street Tacos', 14, 'street-tacos.png', 342, 84, 55);
+
+-- ===============================
+--█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █ █▄░█ █▀▄ █ █░█ █ █▀▄ █░█ ▄▀█ █░░   █▀▀ █░█ ▄▀█ ▀█▀ █▀
+--█ █░▀█ ▄█ ██▄ █▀▄ ░█░   █ █░▀█ █▄▀ █ ▀▄▀ █ █▄▀ █▄█ █▀█ █▄▄   █▄▄ █▀█ █▀█ ░█░ ▄█
+-- ===============================
+----ＩＮＳＥＲＴ ＣＨＡＴＳ
+INSERT INTO chats (is_group) VALUES
+(FALSE), (FALSE), (FALSE), (FALSE), (FALSE), (FALSE);
+
+--ＩＮＳＥＲＴ ＣＨＡＴ ＰＡＲＴＩＣＩＰＡＮＴＳ
+INSERT INTO chat_participants (chat_id, user_id) VALUES
+(1, 1), (1, 2),
+(2, 1), (2, 3),
+(3, 1), (3, 4),
+(4, 1), (4, 5),
+(5, 1), (5, 6),
+(6, 1), (6, 7);
+
+-- ===============================
+--█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █▀▀ █▀█ █▀█ █░█ █▀█   █▀▀ █░█ ▄▀█ ▀█▀ █▀
+--█ █░▀█ ▄█ ██▄ █▀▄ ░█░   █▄█ █▀▄ █▄█ █▄█ █▀▀   █▄▄ █▀█ █▀█ ░█░ ▄█
+-- ===============================
+--ＩＮＳＥＲＴ ＣＨＡＴＳ
+INSERT INTO chats (is_group, name) VALUES
+(TRUE, 'Cooking Buddies'),
+(TRUE, 'Family Recipes'),
+(TRUE, 'Foodies United'),
+(TRUE, 'Travel & Food'),
+(TRUE, 'Recipe Experiments');
+
+--ＩＮＳＥＲＴ ＣＨＡＴ ＰＡＲＴＩＣＩＰＡＮＴＳ
+INSERT INTO chat_participants (chat_id, user_id) VALUES
+(7, 1), (7, 8), (7, 9), (7, 10),
+(8, 1), (8, 11), (8, 12),
+(9, 1), (9, 13), (9, 14), (9, 2),
+(10, 1), (10, 3), (10, 4), (10, 5),
+(11, 1), (11, 6), (11, 7), (11, 8);
+
+-- ===============================
+--█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █▀▄▀█ █▀▀ █▀ █▀ ▄▀█ █▀▀ █▀▀ █▀
+--█ █░▀█ ▄█ ██▄ █▀▄ ░█░   █░▀░█ ██▄ ▄█ ▄█ █▀█ █▄█ ██▄ ▄█
+-- ===============================
+-- Insert Messages with Dynamic Timestamps for All Chats
+-- ===============================
+-- Insert Messages with Dynamic IDs and Timestamps
+WITH chat_base AS (
+    SELECT chat_id, sender_id, content,
+           ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY chat_id) AS message_id
+    FROM (VALUES
+        -- Chat 1
+        (1, 1, 'Hey Ethan, how’s the new recipe going?'),
+        (1, 2, 'Pretty good! I just tried the Thai curry.'),
+        (1, 1, 'Yum, send me the recipe when you can!'),
+        (1, 2, 'I just tried tweaking the Thai curry with extra lemongrass!'),
+        (1, 1, 'Sounds amazing, Ethan! Did it turn out spicy?'),
+        (1, 2, 'A little, but in a good way. You would love it.'),
+        (1, 1, 'I need that recipe, I’ll cook it tonight.'),
+        (1, 2, 'Sure! I’ll send it after dinner.'),
+        (1, 1, 'Perfect, can’t wait to try it.'),
+        (1, 2, 'By the way, I added some coconut milk this time.'),
+        (1, 1, 'Nice! That’ll make it creamier.'),
+        (1, 2, 'Exactly, and I roasted some peanuts on top too.'),
+        (1, 1, 'Ooooh, that’s genius!'),
+        (1, 2, 'Do you want me to bring some for you tomorrow?'),
+        (1, 1, 'Yes please, I’ll have lunch ready for us.'),
+        (1, 2, 'Awesome! I’ll pack it carefully.'),
+        (1, 1, 'Thanks, Ethan! You always make the best dishes.'),
+        (1, 2, 'Haha, you’re too kind. But your salad last week was amazing.'),
+        (1, 1, 'Thanks! I added a new dressing, want the recipe?'),
+        (1, 2, 'Absolutely, send it over.'),
+        (1, 1, 'Done! It’s a mix of olive oil, lemon, and honey.'),
+        (1, 2, 'I love it! Simple but flavorful.'),
+        (1, 1, 'Exactly! Sometimes less is more.'),
+        (1, 2, 'Agreed. We should cook together this weekend.'),
+        (1, 1, 'Yes! Let’s plan a Thai-themed night.'),
+        (1, 2, 'Perfect, I’ll bring the curry.'),
+        (1, 1, 'And I’ll handle the dessert. Maybe mango sticky rice?'),
+        (1, 2, 'Oh yes, that’s my favorite!'),
+        (1, 1, 'Great! Should we invite Olivia too?'),
+        (1, 2, 'Sure, she loves cooking.'),
+        (1, 1, 'Awesome! This will be fun.'),
+        (1, 2, 'Totally, can’t wait.'),
+        (1, 1, 'Me neither, Ethan 😄'),
+        (1, 2, 'See you Saturday then!'),
+        (1, 1, 'See you! I’ll prep the ingredients.'),
+        (1, 2, 'Thanks, Isabella! This is going to be delicious.'),
+        -- Chat 2
+        (2, 3, 'Hi Alice, have you seen my soup recipe?'),
+        (2, 1, 'Yes! It looks amazing, I’ll try it tonight.'),
+        -- Chat 3
+        (3, 4, 'Hey Alice 👋 Want to cook Carbonara together?'),
+        (3, 1, 'Sure! I’ll bring the parmesan.'),
+        -- Chat 4
+        (4, 5, 'Alice, do you want my Bibimbap recipe?'),
+        (4, 1, 'Absolutely, share it with me!'),
+        -- Chat 5
+        (5, 6, 'Alice, I made Moroccan Tagine today!'),
+        (5, 1, 'Wow Amir, that must taste amazing!'),
+        -- Chat 6
+        (6, 7, 'Alice, ramen night this weekend?'),
+        (6, 1, 'Count me in 🍜'),
+        -- Group 7
+        (7, 1, 'Hey team! Any new ideas for this week?'),
+        (7, 9, 'I’ll try a vegan dish!'),
+        (7, 10, 'Perfect, I’ll bring wine 🍷'),
+        -- Group 8
+        (8, 11, 'Alice, check out my ceviche recipe.'),
+        (8, 1, 'Looks delicious! I’ll try it soon.'),
+        -- Group 9
+        (9, 2, 'Alice, Sofia and I are testing street tacos.'),
+        (9, 1, 'Save some for me 🌮'),
+        -- Group 10
+        (10, 3, 'Alice, remember our food trip in Paris?'),
+        (10, 1, 'Of course! Best croissants ever 🥐'),
+        -- Group 11
+        (11, 8, 'Alice, I want to test new spice blends.'),
+        (11, 1, 'Great, I’ll join! Let’s experiment!')
+    ) AS t(chat_id, sender_id, content)
+)
+INSERT INTO messages (chat_id, id, sender_id, content, created_at)
+SELECT
+    chat_id,
+    message_id,
+    sender_id,
+    content,
+    '2025-08-25 12:00:00'::timestamptz
+      + ((message_id - 1) * interval '2 minutes') -- spacing 2 mins between messages
+      + ((chat_id - 1) * interval '1 hour')       -- offset each chat 1 hour apart
+FROM chat_base
+ORDER BY chat_id, message_id;

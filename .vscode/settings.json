@@ -1,0 +1,19 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  
+  "editor.semanticHighlighting.enabled": true,
+    "editor.semanticTokenColorCustomizations": {
+    "enabled": true,
+    "rules": {
+      //"function": "#d5e069",
+      //"type": "#44c24e", 
+      "variable": "#f0a7b1",
+      "parameter": "#e05ecb",
+      //"property": "#f0a500",}
+  },
+  
+}
