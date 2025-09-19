@@ -664,9 +664,7 @@ app.post("/register", async (req, res) => {
 
 //█▀▀ █░█ ▄▀█ █▄░█ █▀▀ █▀▀   ▄▀█ █░█ ▄▀█ ▀█▀ ▄▀█ █▀█
 //█▄▄ █▀█ █▀█ █░▀█ █▄█ ██▄   █▀█ ▀▄▀ █▀█ ░█░ █▀█ █▀▄
-const SUPABASE_URL='https://fonmfdecbnlpvimippjp.supabase.co'
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvbm1mZGVjYm5scHZpbWlwcGpwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Nzk2MTk2MywiZXhwIjoyMDczNTM3OTYzfQ._rQXT_ePvpwe_HIdSmIcjo4UhKlmlP3vNWr6QR2czrg'
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 app.post("/upload-avatar", async (req, res) => {
 
   try{
