@@ -1,13 +1,13 @@
 //npm install zustand
 //npx expo install @react-native-async-storage/async-storage
 //---------------------------------------------------------------
-import { API_changeAvatar, API_login, API_registerUser } from "@/API_CALLS";
 import { User } from "@/props/props";
-import { ws_connectWebSocket, ws_disconnectWebSocket } from "@/SERVER/websocket_client";
+import { ws_connectWebSocket, ws_disconnectWebSocket } from "@/███ＳＥＲＶＥＲ███/websocket_client";
+import { API_changeAvatar, API_login, API_registerUser } from "@/ＡＰＩ_ＣＡＬＬＳ";
 import * as ImagePicker from "expo-image-picker";
 import { create } from "zustand";
-import { useChatStore } from "./chatStore";
-import { useRecipeStore } from "./recipeStore";
+import { useChatStore } from "./chat_Store";
+import { useRecipeStore } from "./recipe_Store";
 
 interface AuthState {
   isUserAuthenticated: boolean;
@@ -31,9 +31,6 @@ export const useAuthStore = create<AuthState>((set,get) => ({
   changeAvatar: async () => {
     const user = get().user;
     if (!user?.id) return;
-
-    console.log("changing avatar, api_secret: ");
-    console.log(process.env.CLOUDINARY_API_SECRET);
 
     // Pick image
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();

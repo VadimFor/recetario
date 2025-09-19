@@ -1,6 +1,6 @@
-import { LOCALHOST_IP } from "@/API_CALLS";
-import { useAuthStore } from "@/store/authStore";
-import { ChatProps, MessageProp, useChatStore } from "@/store/chatStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { ChatProps, MessageProp, useChatStore } from "@/███ＳＴＯＲＥ████/chat_Store";
+import { LOCALHOST_IP } from "@/ＡＰＩ_ＣＡＬＬＳ";
 
 let socket: WebSocket | null = null;
 

@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
 import * as Sentry from "@sentry/react-native";
 import { Link } from "expo-router";
 import React, { useState } from "react";

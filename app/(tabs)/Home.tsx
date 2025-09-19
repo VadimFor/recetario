@@ -1,6 +1,6 @@
 import RecipeList from "@/components/RecipeList";
-import { useAuthStore } from "@/store/authStore";
-import { useRecipeStore } from "@/store/recipeStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import * as NavigationBar from "expo-navigation-bar";
 import React, { useEffect } from "react";
 import { Text, View } from "react-native";

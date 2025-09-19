@@ -1,13 +1,14 @@
 import ErrorPopup from "@/components/ErrorPopup";
 import SearchBar from "@/components/SearchBar";
 import RecipeCard_MIS from "@/components/TAB_USER/RecipeCard_MIS";
-import { useAuthStore } from "@/store/authStore";
-import { useRecipeStore } from "@/store/recipeStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import * as NavigationBar from "expo-navigation-bar";
 import React, { useEffect, useState } from "react";
 
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
   Modal,
   SafeAreaView,
@@ -28,6 +29,7 @@ const MisRecetas = ({ showAddButton = true }) => {
 
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState("");
+  const { height } = Dimensions.get("window");
 
   // Fetch user recipes
   useEffect(() => {
@@ -129,7 +131,10 @@ const MisRecetas = ({ showAddButton = true }) => {
           animationType="fade"
           onRequestClose={() => setCreateModalVisible(false)}
         >
-          <View className="flex-1 justify-center items-center bg-black bg-opacity-25">
+          <View
+            className="h-120 flex-1 justify-center items-center bg-transparent bg-opacity-25"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
             <View className="bg-white p-6 rounded-2xl w-11/12 shadow-lg">
               <Text className="text-gray-800 font-bold text-xl mb-4 text-center">
                 Create New Recipe

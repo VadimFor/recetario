@@ -1,5 +1,5 @@
 import { User } from "@/props/props";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
 import * as Sentry from "@sentry/react-native";
 import React, { useState } from "react";
 import {

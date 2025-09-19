@@ -1,51 +1,11 @@
 import * as FileSystem from "expo-file-system/legacy"; // legacy import to avoid deprecation
-import { useEffect, useState } from "react";
 
 
 export const LOCALHOST_IP = "192.168.1.100";
 const BACKEND_PORT= "3001";
 
-
 const API_BASE_IP = `${LOCALHOST_IP}:${BACKEND_PORT}`;
 
-
-//█░█ █▀█ █▀█ █▄▀
-//█▀█ █▄█ █▄█ █░█
-const useFetch = <T>(fetchFunction: () => Promise<T>, autofetch = true) => {
-    const [data, setData] = useState<T | null>(null);
-    const [error, setError] = useState<Error | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const result = await fetchFunction();
-            setData(result);
-        } catch (err) {
-            setError(err instanceof Error ? err : new Error("An error occurred"));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const reset = () => {
-        setData(null);
-        setLoading(false);
-        setError(null);
-    };
-
-    useEffect(() => {
-        if (autofetch) {
-            fetchData();
-        }
-    }, []);
-
-    return { data, error, loading, fetchData, reset };
-};
-
-export default useFetch;
 /*======================================================
 ██████╗░███████╗░█████╗░███████╗████████╗░█████╗░░██████╗
 ██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝
@@ -123,7 +83,6 @@ export const API_deleteRecipe = async (recipeId: string, userId: string) => {
   }
 }
 
-
 //█▀▀ █▀▄ █ ▀█▀ ▄▀█ █▀█   █▀█ █▀▀ █▀▀ █▀▀ ▀█▀ ▄▀█ 
 //██▄ █▄▀ █ ░█░ █▀█ █▀▄   █▀▄ ██▄ █▄▄ ██▄ ░█░ █▀█
 export const API_editRecipe = async (recipeId: string, userId: string, newTitle: string) => {
@@ -138,6 +97,29 @@ export const API_editRecipe = async (recipeId: string, userId: string, newTitle:
   }
 
   return response.json();
+};
+
+//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀
+//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄
+export const API_addRecipePicture = async (recipeId: string, fileUri: string) => {
+  try {
+      // Read file as base64
+    const base64 = await FileSystem.readAsStringAsync(fileUri, { encoding: "base64" });
+
+    // Send to your backend
+    const response = await fetch(`http://${API_BASE_IP}/upload-avatar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileBase64: base64, recipeId }),
+    });
+
+    if (!response.ok) throw new Error("Upload recipe picture failed");
+      const { url } = await response.json();
+      return url;
+  } catch (error) {
+    console.error("(uploadImageToSupabase) Error: ", error);
+    throw error;
+  }
 };
 
 /*==============================================================================================================================
@@ -567,8 +549,8 @@ export const API_changeAvatar = async (fileUri: string, userId: string) => {
   });
 
   if (!response.ok) throw new Error("Upload failed");
-  const { url } = await response.json();
-  return url;
+    const { url } = await response.json();
+    return url;
   } catch (error) {
     console.error("(uploadImageToSupabase) Error:", error);
     throw error;

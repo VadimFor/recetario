@@ -1,7 +1,10 @@
-import { API_createRecipe, API_deleteRecipe, API_editRecipe, API_fetchLikedRecipes, API_fetchRecipes, API_fetchUserRecipes, API_likeRecipe, API_unlikeRecipe } from "@/API_CALLS";
 import { Recipe } from "@/props/props";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { API_createRecipe, API_deleteRecipe, API_editRecipe, API_fetchLikedRecipes, API_fetchRecipes, API_fetchUserRecipes, API_likeRecipe, API_unlikeRecipe } from "@/ＡＰＩ_ＣＡＬＬＳ";
+import * as ImagePicker from "expo-image-picker";
 import { create } from "zustand";
+
+
 
 type RecipeStore = {
   //TAB HOME
@@ -25,7 +28,37 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
   loading: false,
   error: null,
 
+  addRecipePicture: async () => {
+    const {user} = useAuthStore.getState();
+    if (!user?.id) return;
 
+    // Pick image
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access media is required!");
+      return;
+    }
+
+    // Launch image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      quality: 1,
+    });
+      
+    if (result.canceled) return;
+
+    const pickedImageUri = result.assets[0].uri;
+
+    try {
+      const uploadedUrl = await API_addRecipePicture(pickedImageUri, user.id);
+      console.log("Uploaded avatar URL:", uploadedUrl);
+      set({ user: { ...user, avatar: uploadedUrl } });
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      alert("Failed to upload avatar.");
+    }
+  },
 
   //█▀▀ █░░ █▀▀ ▄▀█ █▀█
   //█▄▄ █▄▄ ██▄ █▀█ █▀▄

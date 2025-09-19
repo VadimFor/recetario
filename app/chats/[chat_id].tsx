@@ -1,9 +1,13 @@
 import {
   ws_sendMessage,
   ws_subscribeToNewChat,
-} from "@/SERVER/websocket_client";
-import { useAuthStore } from "@/store/authStore";
-import { ChatProps, MessageProp, useChatStore } from "@/store/chatStore";
+} from "@/███ＳＥＲＶＥＲ███/websocket_client";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import {
+  ChatProps,
+  MessageProp,
+  useChatStore,
+} from "@/███ＳＴＯＲＥ████/chat_Store";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { ArrowLeft, MoreVertical, Send } from "lucide-react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";

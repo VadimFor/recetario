@@ -1,5 +1,5 @@
-import { useAuthStore } from "@/store/authStore";
-import { useChatStore } from "@/store/chatStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { useChatStore } from "@/███ＳＴＯＲＥ████/chat_Store";
 import { Link } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { formatMessageTime, getRandomAvatar } from "../auxiliares";

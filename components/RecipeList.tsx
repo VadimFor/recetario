@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 
-import { useRecipeStore } from "@/store/recipeStore";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import RecipeCard_FAV from "./RecipeCard_FAV";
 import RecipeCard_HOME_SOCIAL from "./RecipeCard_HOME_SOCIAL";
 import SearchBar from "./SearchBar";

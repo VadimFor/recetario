@@ -1,7 +1,7 @@
 import Login from "@/components/TAB_USER/Login";
 import MisRecetas from "@/components/TAB_USER/MisRecetas";
 import Register from "@/components/TAB_USER/Register";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 
