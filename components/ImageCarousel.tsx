@@ -113,7 +113,9 @@ const ImageCarousel = ({ data }: { data: string[] }) => {
                 }}
               >
                 <Image
-                  source={{ uri: imageUrl }} // Image URL
+                  source={
+                    typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl
+                  } // Image URL
                   className="w-full" // Fill container width
                   resizeMode="cover" // Cover entire container
                   style={{ height: SCREEN_WIDTH * 0.7 }} // Height 70% of screen width
