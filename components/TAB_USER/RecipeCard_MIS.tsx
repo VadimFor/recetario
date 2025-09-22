@@ -45,6 +45,8 @@ const RecipeCard_MIS = ({
     setDeleteModalVisible(false);
   };
 
+  console.log("recipe_images for", id, recipe_images);
+
   //============================================================================================================
   //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
   //█▀▄ ██▄ ░█░ █▄█ █▀▄ █░▀█

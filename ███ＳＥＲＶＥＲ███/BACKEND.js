@@ -78,12 +78,30 @@ app.get("/recipes/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     console.log("Fetching user recipes from the database...");
+
     const result = await pool.query(`
-      SELECT r.*
+      SELECT 
+        r.*,
+        u.username,
+        u.avatar,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'image_id', ri.image_id,
+              'url', ri.url,
+              'created_at', ri.created_at
+            )
+          ) FILTER (WHERE ri.image_id IS NOT NULL), 
+          '[]'
+        ) AS recipe_images
       FROM recipes r
-      WHERE user_id = $1
-      ORDER By r.created_at DESC
+      JOIN users u ON r.user_id = u.id
+      LEFT JOIN recipe_images ri ON r.id = ri.recipe_id
+      WHERE r.user_id = $1
+      GROUP BY r.id, u.username, u.avatar
+      ORDER BY r.created_at DESC
     `, [userId]);
+
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching user recipes:", err);
@@ -96,7 +114,7 @@ app.get("/recipes/:userId", async (req, res) => {
 // Crear nueva receta
 app.post("/create_recipe", async (req, res) => {
   try {
-    const { title, user_id} = req.body;
+    const {title, user_id} = req.body;
 
     if (!title || !user_id) {
       return res.status(400).json({ error: "Missing required fields (title, user_id)" });
@@ -109,7 +127,7 @@ app.post("/create_recipe", async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO recipes (title, user_id) 
-       VALUES ($1, $2) 
+       VALUES ($1, $2, $3) 
        RETURNING *`,
       [title, user_id]
     );
@@ -171,7 +189,7 @@ app.post("/upload-recipe-pictures", async (req, res) => {
     let nextImageId = max_id.rows[0].max_id;
     const uploadedImages = [];
 
-    //recorro el array de imagenes seleccionadas, los meto en supabase 
+    //recorro el array de imagenes seleccionadas, los meto en supabase y en la db de la app
     for (const rawBase64 of base64s) {
 
        //miro si es correcto el uri
@@ -205,15 +223,13 @@ app.post("/upload-recipe-pictures", async (req, res) => {
         return res.status(500).json({ error: "Failed to generate public URL." });
       }
 
-      //añado el public url al array
-      uploadedImages.push(imageUrl);
-    }
-
-    for (const url of uploadedImages) { 
+      //meto la imagen en mi base de datos de la app
       const insertResult = await pool.query(
-        `INSERT INTO recipe_images (recipe_id, url) VALUES ($1, $2, $3) RETURNING *`,
-        [recipeId, url]
+        `INSERT INTO recipe_images (image_id, recipe_id, url) VALUES ($1, $2, $3) RETURNING *`,
+        [nextImageId, recipeId, imageUrl]
       );
+      //añado el public url de supabase para que se vean en el front
+      uploadedImages.push(insertResult.rows[0]);
     }
 
     res.json({ images: uploadedImages }); //devuelvo los public url de las imagenes subidas
