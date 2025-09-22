@@ -66,7 +66,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
         recipeId
       );
 
-      console.log("Uploaded recipe pictures:", uploadedUrls);
+      console.log("Uploaded recipe pictures:", uploadedUrls[0].url);
 
       // ✅ Update state with all new images
       set({
@@ -188,7 +188,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
 
   //█▀▀ █▀█ █▀▀ ▄▀█ █▀█   █▀█ █▀▀ █▀▀ █▀▀ ▀█▀ ▄▀█
   //█▄▄ █▀▄ ██▄ █▀█ █▀▄   █▀▄ ██▄ █▄▄ ██▄ ░█░ █▀█
-  createRecipe: async (title: string, image?: string) => {
+  createRecipe: async (title: string) => {
     const { user } = useAuthStore.getState();
     if (!user?.id) {
       console.error("User not authenticated, cannot create recipe");
@@ -197,7 +197,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const newRecipe : Recipe = await API_createRecipe(title, String(user.id), image);
+      const newRecipe : Recipe = await API_createRecipe(title, String(user.id));
 
       // Re-fetch all recipes to stay consistent
       await get().fetchAllRecipes();

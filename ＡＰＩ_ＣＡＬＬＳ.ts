@@ -44,12 +44,12 @@ export const API_fetchUserRecipes = async  (userId: string)  => {
 };
 //█▀▀ █▀█ █▀▀ ▄▀█ ▀█▀ █▀▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
 //█▄▄ █▀▄ ██▄ █▀█ ░█░ ██▄   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄
-export const API_createRecipe = async (title: string, user_id: string, image: string | undefined) => {
+export const API_createRecipe = async (title: string, user_id: string) => {
   try {
     const response = await fetch(`http://${API_BASE_IP}/create_recipe`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, user_id, image }),
+      body: JSON.stringify({ title, user_id}),
     });
 
     if (!response.ok) throw new Error();

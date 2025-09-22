@@ -96,16 +96,11 @@ app.get("/recipes/:userId", async (req, res) => {
 // Crear nueva receta
 app.post("/create_recipe", async (req, res) => {
   try {
-    const { title, user_id, image } = req.body;
+    const { title, user_id} = req.body;
 
     if (!title || !user_id) {
       return res.status(400).json({ error: "Missing required fields (title, user_id)" });
     }
-    
-    // fallback image if none provided
-    const finalImage = image && image.trim() !== "" 
-      ? image 
-      : "default.png";   
 
     // FIX DE LA SECUENCIA SETVAL (lo del id incremental)
     const maxIdResult = await pool.query(`SELECT MAX(id) AS max_id FROM recipes`);
@@ -113,10 +108,10 @@ app.post("/create_recipe", async (req, res) => {
     await pool.query(`SELECT setval('recipes_id_seq', $1, false)`, [maxId + 1]);
 
     const result = await pool.query(
-      `INSERT INTO recipes (title, user_id, image) 
-       VALUES ($1, $2, $3) 
+      `INSERT INTO recipes (title, user_id) 
+       VALUES ($1, $2) 
        RETURNING *`,
-      [title, user_id, finalImage]
+      [title, user_id]
     );
 
     res.status(201).json(result.rows[0]);
@@ -176,7 +171,7 @@ app.post("/upload-recipe-pictures", async (req, res) => {
     let nextImageId = max_id.rows[0].max_id;
     const uploadedImages = [];
 
-    //recorro el array de imagenes seleccionadas, los meto en supabase y en la db de la app
+    //recorro el array de imagenes seleccionadas, los meto en supabase 
     for (const rawBase64 of base64s) {
 
        //miro si es correcto el uri
@@ -210,13 +205,15 @@ app.post("/upload-recipe-pictures", async (req, res) => {
         return res.status(500).json({ error: "Failed to generate public URL." });
       }
 
-      //meto la imagen en mi base de datos de la app
+      //añado el public url al array
+      uploadedImages.push(imageUrl);
+    }
+
+    for (const url of uploadedImages) { 
       const insertResult = await pool.query(
-        `INSERT INTO recipe_images (image_id, recipe_id, url) VALUES ($1, $2, $3) RETURNING *`,
-        [nextImageId, recipeId, imageUrl]
+        `INSERT INTO recipe_images (recipe_id, url) VALUES ($1, $2, $3) RETURNING *`,
+        [recipeId, url]
       );
-      //añado el public url de supabase para que se vean en el front
-      uploadedImages.push(insertResult.rows[0]);
     }
 
     res.json({ images: uploadedImages }); //devuelvo los public url de las imagenes subidas

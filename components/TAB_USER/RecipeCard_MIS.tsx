@@ -27,11 +27,11 @@ const RecipeCard_MIS = ({
   title,
   user_id,
   username,
-  image,
   likes,
   comments,
   shares,
   red_hearth,
+  recipe_images,
 }: Recipe) => {
   const { deleteRecipe } = useRecipeStore();
 
@@ -73,7 +73,13 @@ const RecipeCard_MIS = ({
             {/*█ █▀▄▀█ ▄▀█ █▀▀ █▀▀ █▄░█
                █ █░▀░█ █▀█ █▄█ ██▄ █░▀█*/}
             <Image
-              source={{ uri: image }}
+              source={
+                recipe_images &&
+                recipe_images.length > 0 &&
+                recipe_images[0].url
+                  ? { uri: recipe_images[0].url }
+                  : require("@/assets/recipes/default.png")
+              }
               className="w-full h-52 rounded-lg"
               resizeMode="cover"
             />

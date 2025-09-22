@@ -11,7 +11,6 @@ export type RecipeImage = {
 export type Recipe = {
   id: string;
   title: string;
-  image: RecipeImageKey;
   likes: number;
   comments: number;
   shares: number;
