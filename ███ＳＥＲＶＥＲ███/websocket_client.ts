@@ -65,7 +65,7 @@ export const ws_connectWebSocket = (userId: string) => {
 
     const { user } = useAuthStore.getState();
     if (user?.id){
-      scheduleReconnect();
+      //scheduleReconnect();
     }
   };
   

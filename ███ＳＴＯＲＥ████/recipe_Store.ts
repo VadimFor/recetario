@@ -1,10 +1,27 @@
-import { Recipe } from "@/props/props";
+import { Recipe, RecipeImage } from "@/props/props";
 import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
-import { API_createRecipe, API_deleteRecipe, API_editRecipe, API_fetchLikedRecipes, API_fetchRecipes, API_fetchUserRecipes, API_likeRecipe, API_unlikeRecipe } from "@/ＡＰＩ_ＣＡＬＬＳ";
+import { API_addRecipePicture, API_createRecipe, API_deleteRecipe, API_editRecipe, API_fetchLikedRecipes, API_fetchRecipes, API_fetchUserRecipes, API_likeRecipe, API_unlikeRecipe } from "@/ＡＰＩ_ＣＡＬＬＳ";
 import * as ImagePicker from "expo-image-picker";
 import { create } from "zustand";
 
+// 🔹 Helper function: pick image from gallery
+async function pickImageFromGallery(): Promise<string | null> {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== "granted") {
+    alert("Permission to access media is required!");
+    return null;
+  }
 
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: "images",
+    allowsEditing: true,
+    quality: 1,
+  });
+
+  if (result.canceled) return null;
+
+  return result.assets[0].uri;
+}
 
 type RecipeStore = {
   //TAB HOME
@@ -20,55 +37,78 @@ type RecipeStore = {
   deleteRecipe: (id: string) => Promise<void>;
   editRecipe: (recipeId: string, newTitle: string) => Promise<void>;
   clear_user_recipes: () => void;
+  addRecipePictures: (recipeId: string, imageUris: string[]) => void;
+  pickImagesFromGallery: () => Promise<string[]>
 };
 
-export const useRecipeStore = create<RecipeStore>((set, get) => ({
-  recipes: [],
-  user_recipes: [],
-  loading: false,
-  error: null,
+  export const useRecipeStore = create<RecipeStore>((set, get) => ({
+    recipes: [],
+    user_recipes: [],
+    loading: false,
+    error: null,
+  
+    pickImagesFromGallery: async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access media is required!");
+        return [];
+      }
 
-  addRecipePicture: async () => {
-    const {user} = useAuthStore.getState();
-    if (!user?.id) return;
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsEditing: false,
+        quality: 1,
+        allowsMultipleSelection: true, // ✅ allow multiple images
+      });
 
-    // Pick image
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Permission to access media is required!");
-      return;
-    }
+      if (result.canceled) return [];
 
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 1,
-    });
-      
-    if (result.canceled) return;
+      return result.assets.map((asset) => asset.uri);
+    },
 
-    const pickedImageUri = result.assets[0].uri;
+    addRecipePictures: async (recipeId: string, imageUris: string[]) => {
+      const { user } = useAuthStore.getState();
+      if (!user?.id) return;
+      const { recipes } = get();
 
-    try {
-      const uploadedUrl = await API_addRecipePicture(pickedImageUri, user.id);
-      console.log("Uploaded avatar URL:", uploadedUrl);
-      set({ user: { ...user, avatar: uploadedUrl } });
-    } catch (error) {
-      console.error("Avatar upload failed:", error);
-      alert("Failed to upload avatar.");
-    }
-  },
+      if (!imageUris.length) return;
 
-  //█▀▀ █░░ █▀▀ ▄▀█ █▀█
-  //█▄▄ █▄▄ ██▄ █▀█ █▀▄
-  clear_user_recipes: () => {
-    const { recipes } = get();
-    set({
-      user_recipes: [],
-      recipes: recipes.map((r) => ({ ...r, red_hearth: false })),
-    });
-  },
+      try {
+        // ✅ API now accepts an array of URIs and returns an array of URLs
+        const uploadedUrls: RecipeImage[] = await API_addRecipePicture(
+          imageUris,
+          user.id,
+          recipeId
+        );
+
+        console.log("Uploaded recipe pictures:", uploadedUrls);
+
+        // ✅ Update state with all new images
+        set({
+          recipes: recipes.map((recipe) =>
+            recipe.id === recipeId
+              ? {
+                  ...recipe,
+                  recipe_images: [...recipe.recipe_images, ...uploadedUrls],
+                }
+              : recipe
+          ),
+        });
+      } catch (error) {
+        console.error("Recipe picture upload failed:", error);
+        alert("Failed to upload recipe pictures.");
+      }
+    },
+
+    //█▀▀ █░░ █▀▀ ▄▀█ █▀█
+    //█▄▄ █▄▄ ██▄ █▀█ █▀▄
+    clear_user_recipes: () => {
+      const { recipes } = get();
+      set({
+        user_recipes: [],
+        recipes: recipes.map((r) => ({ ...r, red_hearth: false })),
+      });
+    },
 
   //█▀█ █▀▀ █▀▀ █▀▀ ▀█▀ ▄▀█ █▀
   //█▀▄ ██▄ █▄▄ ██▄ ░█░ █▀█ ▄█

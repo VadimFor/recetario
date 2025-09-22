@@ -1,16 +1,19 @@
 // npm install express pg cors
-require("dotenv").config();
+require("dotenv").config({ path: "../.env" });
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const { createClient } = require("@supabase/supabase-js");
-const { decode } = require("base64-arraybuffer");
+const { decode } = require("base64-arraybuffer");  // npm i uuid
+
 
 const app = express();
 const PORT = 3001;
 
 app.use(cors()); // Allow frontend requests
 app.use(express.json());
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -39,16 +42,33 @@ app.get("/", (req, res) => {
 app.get("/recipes", async (req, res) => {
   try {
     console.log("Fetching recipes from the database...");
+    
     const result = await pool.query(`
-      SELECT r.*, u.username, u.avatar
+      SELECT 
+        r.*,
+        u.username,
+        u.avatar,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'image_id', ri.image_id,
+              'url', ri.url,
+              'created_at', ri.created_at
+            )
+          ) FILTER (WHERE ri.image_id IS NOT NULL), 
+          '[]'
+        ) AS recipe_images
       FROM recipes r
-      JOIN users u on r.user_id = u.id
-      ORDER By r.created_at DESC
+      JOIN users u ON r.user_id = u.id
+      LEFT JOIN recipe_images ri ON r.id = ri.recipe_id
+      GROUP BY r.id, u.username, u.avatar
+      ORDER BY r.created_at DESC
     `);
+
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching recipes:", err);
-    res.status(500).json({ error: "Internal server error. Database with that name might not exist." });
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
@@ -135,6 +155,52 @@ app.delete("/delete_recipe", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀
+//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄
+app.post("/upload-recipe-picture", async (req, res) => {
+
+  try{
+    const { fileBase64, userId , recipeId } = req.body;
+
+    if (!fileBase64 || !userId || !recipeId) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    const arrayBuffer = decode(fileBase64);
+
+    // Get the max id for this recipe_id
+    const max_id = await pool.query(`
+      SELECT MAX(image_id) AS max_id FROM recipe_images WHERE recipe_id = $1
+    `, [recipeId]);
+
+    const maxId = max_id.rows[0].max_id ?? 0; 
+    const imageName = `${maxId + 1}.jpg`; // increment to make filename unique
+
+    const filePath = `images_users/${userId}/recipes/${recipeId}/${imageName}`;
+
+    const { data, error } = await supabase.storage
+      .from("recetarium")
+      .upload(filePath, arrayBuffer, {
+        contentType: "image/jpeg",
+        upsert: true,
+      });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const url = supabase.storage.from("recetarium").getPublicUrl(data.path).data.publicUrl;
+
+    const image = await pool.query(`
+      INSERT INTO recipe_images($3,recipe_id, url) VALUES ($1, $2) RETURNING *
+    `, [recipeId, url, maxId]);
+
+    res.json({ image: image.rows[0] }); 
+
+  }catch(e){
+    console.log(e);
+  }
+});
+
 
 
 
@@ -664,9 +730,6 @@ app.post("/register", async (req, res) => {
 
 //█▀▀ █░█ ▄▀█ █▄░█ █▀▀ █▀▀   ▄▀█ █░█ ▄▀█ ▀█▀ ▄▀█ █▀█
 //█▄▄ █▀█ █▀█ █░▀█ █▄█ ██▄   █▀█ ▀▄▀ █▀█ ░█░ █▀█ █▀▄
-const SUPABASE_URL='https://fonmfdecbnlpvimippjp.supabase.co'
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvbm1mZGVjYm5scHZpbWlwcGpwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Nzk2MTk2MywiZXhwIjoyMDczNTM3OTYzfQ._rQXT_ePvpwe_HIdSmIcjo4UhKlmlP3vNWr6QR2czrg'
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 app.post("/upload-avatar", async (req, res) => {
 
   try{

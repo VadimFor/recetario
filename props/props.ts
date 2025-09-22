@@ -1,6 +1,13 @@
 
 import { RecipeImageKey } from "@/assets/recipeImages";
 
+
+export type RecipeImage = {
+  image_id: number;
+  url: RecipeImageKey;
+  created_at: string;
+};
+
 export type Recipe = {
   id: string;
   title: string;
@@ -12,6 +19,7 @@ export type Recipe = {
   user_id: string;
   username: string;
   user_avatar: string
+  recipe_images: RecipeImage[]; 
 };
 
 export type User = {
