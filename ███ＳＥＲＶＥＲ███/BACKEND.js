@@ -156,51 +156,75 @@ app.delete("/delete_recipe", async (req, res) => {
   }
 });
 
-//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀
-//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄
-app.post("/upload-recipe-picture", async (req, res) => {
+//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀ █▀
+//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄ ▄█
+app.post("/upload-recipe-pictures", async (req, res) => {
+  try {
+    const { base64s, userId, recipeId } = req.body;
 
-  try{
-    const { fileBase64, userId , recipeId } = req.body;
-
-    if (!fileBase64 || !userId || !recipeId) {
+    //compruebo que todos los archivos están bien
+    if (!Array.isArray(base64s) || base64s.length === 0 || !userId || !recipeId) {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const arrayBuffer = decode(fileBase64);
+    //Obtengo el maximo id para introducir en supabase s3 storage
+    const max_id = await pool.query(
+      `SELECT COALESCE(MAX(image_id), 0) AS max_id FROM recipe_images WHERE recipe_id = $1`,
+      [recipeId]
+    );
 
-    // Get the max id for this recipe_id
-    const max_id = await pool.query(`
-      SELECT MAX(image_id) AS max_id FROM recipe_images WHERE recipe_id = $1
-    `, [recipeId]);
+    let nextImageId = max_id.rows[0].max_id;
+    const uploadedImages = [];
 
-    const maxId = max_id.rows[0].max_id ?? 0; 
-    const imageName = `${maxId + 1}.jpg`; // increment to make filename unique
+    //recorro el array de imagenes seleccionadas, los meto en supabase y en la db de la app
+    for (const rawBase64 of base64s) {
 
-    const filePath = `images_users/${userId}/recipes/${recipeId}/${imageName}`;
+       //miro si es correcto el uri
+      const cleanedBase64 = typeof rawBase64 === "string" ? rawBase64.split(",").pop() : null;
+      if (!cleanedBase64) {
+        return res.status(400).json({ error: "Invalid image payload." });
+      }
 
-    const { data, error } = await supabase.storage
-      .from("recetarium")
-      .upload(filePath, arrayBuffer, {
-        contentType: "image/jpeg",
-        upsert: true,
-      });
+      //subo la imagen a supabase
+      nextImageId += 1;
+      const imageName = `${nextImageId}.jpg`;
+      const filePath = `images_users/${userId}/recipes/${recipeId}/${imageName}`;
+      const arrayBuffer = decode(cleanedBase64);
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("recetarium")
+        .upload(filePath, arrayBuffer, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
 
-    if (error) return res.status(500).json({ error: error.message });
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError.message);
+        return res.status(500).json({ error: uploadError.message });
+      }
 
-    const url = supabase.storage.from("recetarium").getPublicUrl(data.path).data.publicUrl;
+      const { data: publicData } = supabase.storage.from("recetarium").getPublicUrl(filePath);
+      const imageUrl = publicData?.publicUrl;
 
-    const image = await pool.query(`
-      INSERT INTO recipe_images($3,recipe_id, url) VALUES ($1, $2) RETURNING *
-    `, [recipeId, url, maxId]);
+      if (!imageUrl) {
+        console.error("Failed to obtain public URL for", filePath);
+        return res.status(500).json({ error: "Failed to generate public URL." });
+      }
 
-    res.json({ image: image.rows[0] }); 
+      //meto la imagen en mi base de datos de la app
+      const insertResult = await pool.query(
+        `INSERT INTO recipe_images (image_id, recipe_id, url) VALUES ($1, $2, $3) RETURNING *`,
+        [nextImageId, recipeId, imageUrl]
+      );
+      //añado el public url de supabase para que se vean en el front
+      uploadedImages.push(insertResult.rows[0]);
+    }
 
-  }catch(e){
-    console.log(e);
+    res.json({ images: uploadedImages }); //devuelvo los public url de las imagenes subidas
+  } catch (e) {
+    console.error("upload-recipe-pictures error:", e);
+    res.status(500).json({ error: "Failed to upload recipe pictures." });
   }
 });
-
 
 
 

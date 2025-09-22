@@ -2,7 +2,6 @@
 PARA LA PESTAÑA DE "MIS RECETAS"
 */
 
-import { recipeImages } from "@/assets/recipeImages";
 import { Recipe } from "@/props/props";
 import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import { Link } from "expo-router";
@@ -46,9 +45,6 @@ const RecipeCard_MIS = ({
     setDeleteModalVisible(false);
   };
 
-  const recipeImage =
-    recipeImages[image] ?? require("../../assets/recipes/default.png");
-
   //============================================================================================================
   //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
   //█▀▄ ██▄ ░█░ █▄█ █▀▄ █░▀█
@@ -77,7 +73,7 @@ const RecipeCard_MIS = ({
             {/*█ █▀▄▀█ ▄▀█ █▀▀ █▀▀ █▄░█
                █ █░▀░█ █▀█ █▄█ ██▄ █░▀█*/}
             <Image
-              source={recipeImage}
+              source={{ uri: image }}
               className="w-full h-52 rounded-lg"
               resizeMode="cover"
             />

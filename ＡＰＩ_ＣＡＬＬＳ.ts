@@ -99,23 +99,26 @@ export const API_editRecipe = async (recipeId: string, userId: string, newTitle:
   return response.json();
 };
 
-//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀
-//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄
-export const API_addRecipePicture = async (fileUri: string,  userId: string, recipeId: string) => {
+//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀ █▀
+//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄ ▄█
+export const API_addRecipePictures = async (imageUris: string[],  userId: string, recipeId: string) => {
   try {
-      // Read file as base64
-    const base64 = await FileSystem.readAsStringAsync(fileUri, { encoding: "base64" });
+    // Convertimos cada URI de imagen en base64 para enviarla al backend
+    const base64s = await Promise.all(
+      imageUris.map((uri) => FileSystem.readAsStringAsync(uri, { encoding: "base64" }))
+    );
 
-    // Send to your backend
-    const response = await fetch(`http://${API_BASE_IP}/upload-recipe-picture`, {
+    // Enviamos la colección de imágenes al backend
+    const response = await fetch(`http://${API_BASE_IP}/upload-recipe-pictures`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fileBase64: base64, userId, recipeId }),
+      body: JSON.stringify({ base64s, userId, recipeId }),
     });
 
     if (!response.ok) throw new Error("Upload recipe picture failed");
-    const { image } = await response.json();
-    return image;
+    // Devolvemos el listado de imágenes que el backend confirmó como guardadas
+    const { images } = await response.json();
+    return images;
   } catch (error) {
     console.error("(uploadImageToSupabase) Error: ", error);
     throw error;

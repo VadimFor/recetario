@@ -8,8 +8,8 @@ import React, { useEffect, useState } from "react";
 
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
+  Image,
   Modal,
   SafeAreaView,
   Text,
@@ -20,8 +20,16 @@ import {
 
 const MisRecetas = ({ showAddButton = true }) => {
   const { user, isUserAuthenticated, isLoading } = useAuthStore();
-  const { user_recipes, loading, error, fetchUserRecipes, createRecipe } =
-    useRecipeStore();
+  const {
+    user_recipes,
+    loading,
+    error,
+    fetchUserRecipes,
+    createRecipe,
+    pickImagesFromGallery,
+    addRecipePictures,
+  } = useRecipeStore();
+  const [images, setImages] = useState<string[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -29,7 +37,6 @@ const MisRecetas = ({ showAddButton = true }) => {
 
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const { height } = Dimensions.get("window");
 
   // Fetch user recipes
   useEffect(() => {
@@ -64,9 +71,29 @@ const MisRecetas = ({ showAddButton = true }) => {
     r.title.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
-  const handleCreate = () => {
-    createRecipe(newTitle);
+  const handlePickImages = async () => {
+    const uris = await pickImagesFromGallery();
+    if (uris.length > 0) {
+      setImages((prev) => [...prev, ...uris]);
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!newTitle.trim()) return;
+
+    try {
+      // Create recipe (store will handle API_createRecipe and add to user_recipes)
+      const newRecipe = await createRecipe(newTitle);
+
+      if (newRecipe && images.length > 0) {
+        addRecipePictures(newRecipe.id, images);
+      }
+    } catch (err) {
+      console.error("Error creating recipe:", err);
+    }
+
     setNewTitle("");
+    setImages([]);
     setCreateModalVisible(false);
   };
 
@@ -125,45 +152,89 @@ const MisRecetas = ({ showAddButton = true }) => {
           </View>
         )}
 
-        <Modal
-          transparent={true}
-          visible={createModalVisible}
-          animationType="fade"
-          onRequestClose={() => setCreateModalVisible(false)}
-        >
-          <View
-            className="h-120 flex-1 justify-center items-center bg-transparent bg-opacity-25"
-            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-          >
-            <View className="bg-white p-6 rounded-2xl w-11/12 shadow-lg">
-              <Text className="text-gray-800 font-bold text-xl mb-4 text-center">
-                Create New Recipe
-              </Text>
+        {/*
+        █▀▄▀█ █▀█ █▀▄ ▄▀█ █░░   ▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
+        █░▀░█ █▄█ █▄▀ █▀█ █▄▄   █▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄*/}
+        <Modal visible={createModalVisible} animationType="fade" transparent>
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white w-11/12 rounded-3xl p-6 shadow-xl">
+              {/* ＭＯＤＡＬ ＨＥＡＤＥＲ ＴＩＴＬＥ */}
+              <View className="flex-row justify-between items-center mb-5">
+                <View className="w-10" />
+                <Text className="text-xl font-bold text-slate-800">
+                  New recipe
+                </Text>
+                <TouchableOpacity onPress={() => setCreateModalVisible(false)}>
+                  <Text className="text-slate-400 text-lg">✕</Text>
+                </TouchableOpacity>
+              </View>
 
-              <Text className="text-gray-700 font-semibold text-base mb-2">
-                Title
-              </Text>
+              {/* ＴＩＴＬＥ ＩＮＰＵＴ */}
+              <Text className="text-slate-600 font-medium mb-2">Title</Text>
               <TextInput
                 value={newTitle}
                 onChangeText={setNewTitle}
-                className="border border-gray-300 rounded-xl p-3 mb-5 text-base bg-gray-50 shadow-sm"
+                className="border border-slate-300 rounded-2xl p-4 mb-5 text-base bg-slate-50"
                 placeholder="Enter recipe title"
                 placeholderTextColor="#9ca3af"
               />
 
+              {/* ＡＤＤ ＩＭＡＧＥ ＢＵＴＴＯＮ */}
+              <TouchableOpacity
+                onPress={handlePickImages}
+                className="bg-indigo-600 py-3 rounded-2xl items-center mb-5 shadow active:scale-95"
+              >
+                <Text className="text-white font-semibold text-base">
+                  + Add Images
+                </Text>
+              </TouchableOpacity>
+
+              {/* ＩＭＡＧＥ ＰＲＥＶＩＥＷ */}
+              {images.length > 0 && (
+                <View className="mb-6">
+                  <Text className="text-slate-600 font-medium mb-3">
+                    Selected Images
+                  </Text>
+                  <View className="flex-row flex-wrap">
+                    {images.map((uri, idx) => (
+                      <View key={idx} className="relative mr-2 mb-2">
+                        <Image
+                          source={{ uri }}
+                          className="w-24 h-24 rounded-2xl"
+                        />
+                        {/* remove button on image */}
+                        <TouchableOpacity
+                          onPress={() =>
+                            setImages((prev) =>
+                              prev.filter((_, i) => i !== idx)
+                            )
+                          }
+                          className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center shadow"
+                        >
+                          <Text className="text-white text-xs">✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {/* ＣＲＥＡＴＥ ＆ ＣＡＮＣＥＬ ＢＵＴＴＯＮＳ */}
               <View className="flex-row justify-between">
                 <TouchableOpacity
-                  className="flex-1 bg-green-600 py-3 mx-1 rounded-xl items-center shadow active:bg-green-700"
+                  className="flex-1 bg-emerald-600 py-3 mx-1 rounded-2xl items-center shadow active:scale-95"
                   onPress={handleCreate}
                 >
-                  <Text className="text-white font-bold text-base">Create</Text>
+                  <Text className="text-white font-semibold text-base">
+                    Create
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="flex-1 bg-gray-200 py-3 mx-1 rounded-xl items-center shadow active:bg-gray-300"
+                  className="flex-1 bg-slate-200 py-3 mx-1 rounded-2xl items-center shadow active:scale-95"
                   onPress={() => setCreateModalVisible(false)}
                 >
-                  <Text className="text-gray-700 font-semibold text-base">
+                  <Text className="text-slate-700 font-medium text-base">
                     Cancel
                   </Text>
                 </TouchableOpacity>
