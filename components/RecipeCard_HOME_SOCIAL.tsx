@@ -19,7 +19,7 @@ const RecipeCard_HOME_SOCIAL = ({
 }: Recipe) => {
   const toggleLike = useRecipeStore((state) => state.toggleLike);
 
-  console.log("username: ", username, "user_avatar: ", user_avatar);
+  //console.log("username: ", username, "user_avatar: ", user_avatar);
 
   return (
     <View className="mb-6">
