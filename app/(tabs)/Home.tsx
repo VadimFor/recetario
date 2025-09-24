@@ -59,7 +59,7 @@ export default function Index() {
       <View className="bg-green-600 pt-10 px-5">
         <Text className="text-white text-3xl font-bold">Recetas</Text>
       </View>
-      <RecipeList />
+      <RecipeList recipes={[]} />
     </View>
   );
 }

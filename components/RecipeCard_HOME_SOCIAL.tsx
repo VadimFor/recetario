@@ -10,7 +10,6 @@ const RecipeCard_HOME_SOCIAL = ({
   id,
   title,
   username,
-  image,
   likes,
   comments,
   shares,
@@ -19,6 +18,8 @@ const RecipeCard_HOME_SOCIAL = ({
   recipe_images,
 }: Recipe) => {
   const toggleLike = useRecipeStore((state) => state.toggleLike);
+
+  console.log("username: ", username, "user_avatar: ", user_avatar);
 
   return (
     <View className="mb-6">
@@ -30,7 +31,7 @@ const RecipeCard_HOME_SOCIAL = ({
               ? { uri: user_avatar }
               : require("@/assets/images/default_avatar.png")
           }
-          className="w-10 h-10 rounded-full mr-3"
+          className="w-16 h-16 rounded-full mr-3"
           resizeMode="cover"
         />
         <View>
@@ -74,9 +75,6 @@ const RecipeCard_HOME_SOCIAL = ({
           <View className="items-center">
             <TouchableOpacity className="relative">
               <Send size={36} color="black" />
-              <Text className="absolute inset-0 text-xs font-bold text-center top-1/2 -translate-y-1/2 text-black">
-                {shares}
-              </Text>
             </TouchableOpacity>
           </View>
         </View>

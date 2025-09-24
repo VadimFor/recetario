@@ -47,7 +47,7 @@ app.get("/recipes", async (req, res) => {
       SELECT 
         r.*,
         u.username,
-        u.avatar,
+        u.avatar as user_avatar,
         COALESCE(
           json_agg(
             json_build_object(
