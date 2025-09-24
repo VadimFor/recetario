@@ -51,9 +51,9 @@ export const useAuthStore = create<AuthState>((set,get) => ({
     const pickedImageUri = result.assets[0].uri;
 
     try {
-      const uploadedUrl = await API_changeAvatar(pickedImageUri, user.id);
-      console.log("Uploaded avatar URL:", uploadedUrl);
-      set({ user: { ...user, avatar: uploadedUrl } });
+      const avatar_url = await API_changeAvatar(pickedImageUri, user.id);
+      console.log("Uploaded avatar URL:", avatar_url);
+      set({ user: { ...user, avatar: avatar_url } });
     } catch (error) {
       console.error("Avatar upload failed:", error);
       alert("Failed to upload avatar.");

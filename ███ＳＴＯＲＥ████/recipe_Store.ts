@@ -54,7 +54,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
   addRecipePictures: async (recipeId: string, imageUris: string[]) => {
     const { user } = useAuthStore.getState();
     if (!user?.id) return;
-    const { recipes } = get();
+    const { recipes, user_recipes } = get();
 
     if (!imageUris.length) return;
 
@@ -66,11 +66,21 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
         recipeId
       );
 
-      console.log("Uploaded recipe pictures:", uploadedUrls[0].url);
+      //console.log("Uploaded recipe pictures:", uploadedUrls[0].url);
 
       // ✅ Update state with all new images
       set({
         recipes: recipes.map((recipe) =>
+          recipe.id === recipeId
+            ? {
+                ...recipe,
+                recipe_images: [...recipe.recipe_images, ...uploadedUrls],
+              }
+            : recipe
+        ),
+      });
+      set({
+        user_recipes: user_recipes.map((recipe) =>
           recipe.id === recipeId
             ? {
                 ...recipe,

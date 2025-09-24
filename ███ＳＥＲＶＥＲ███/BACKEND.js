@@ -785,11 +785,11 @@ app.post("/upload-avatar", async (req, res) => {
 
     const url = supabase.storage.from("recetarium").getPublicUrl(data.path).data.publicUrl;
 
-    const result = await pool.query(`
-      UPDATE users set avatar_url=$1 WHERE id = $2
+    await pool.query(`
+      UPDATE users set avatar=$1 WHERE id = $2
     `, [url, userId]);
 
-    res.json({ url: url });
+    res.json({ avatar: url });
   
   }catch(e){
     console.log(e);

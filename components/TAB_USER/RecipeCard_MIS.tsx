@@ -45,7 +45,7 @@ const RecipeCard_MIS = ({
     setDeleteModalVisible(false);
   };
 
-  console.log("recipe_images for", id, recipe_images);
+  //console.log("recipe_images for", id, recipe_images);
 
   //============================================================================================================
   //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
@@ -98,7 +98,6 @@ const RecipeCard_MIS = ({
 
                 <View className="flex-1 flex-row items-center justify-center ">
                   <Send size={30} color="#6b7280" />
-                  <Text className="font-bold text-gray-500">{shares}</Text>
                 </View>
 
                 <View className="flex-1 flex-row items-center justify-center ">

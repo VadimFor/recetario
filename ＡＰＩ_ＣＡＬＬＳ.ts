@@ -552,8 +552,8 @@ export const API_changeAvatar = async (fileUri: string, userId: string) => {
   });
 
   if (!response.ok) throw new Error("Upload failed");
-    const { url } = await response.json();
-    return url;
+    const { avatar } = await response.json();
+    return avatar;
   } catch (error) {
     console.error("(uploadImageToSupabase) Error:", error);
     throw error;
