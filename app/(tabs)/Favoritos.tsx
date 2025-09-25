@@ -20,8 +20,9 @@ const Favoritos = () => {
     const init = async () => {
       NavigationBar.setVisibilityAsync("hidden");
       if (!cancelled && user?.id) {
-        await fetchAllRecipes();
-        await fetchUserLikedRecipes(String(user.id));
+        //await fetchAllRecipes();
+        //await fetchUserLikedRecipes(String(user.id));
+        //await fetchUserBookmarkedRecipes(String(user.id));
       }
     };
 
@@ -62,7 +63,7 @@ const Favoritos = () => {
         <TouchableOpacity
           onPress={() => pagerRef.current?.setPage(0)}
           className={`w-1/2 py-3 flex-row justify-center items-center space-x-2 ${
-            page === 0 ? "bg-red-500" : "bg-red-200"
+            page === 0 ? "bg-red-500" : "bg-grey-200"
           }`}
         >
           <Heart
@@ -83,7 +84,7 @@ const Favoritos = () => {
         <TouchableOpacity
           onPress={() => pagerRef.current?.setPage(1)}
           className={`w-1/2 py-3 flex-row justify-center items-center space-x-2 ${
-            page === 1 ? "bg-red-500" : "bg-red-200"
+            page === 1 ? "bg-red-500" : "bg-grey-200"
           }`}
         >
           <Bookmark

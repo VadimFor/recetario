@@ -12,24 +12,31 @@ const RecipeCard_FAV = ({
   username,
   likes,
   comments,
+  bookmarked,
   shares,
   red_hearth,
   recipe_images,
 }: Recipe) => {
   const toggleLike = useRecipeStore((state) => state.toggleLike);
-  const id_ = String(id);
+  const toggleBookmark = useRecipeStore((state) => state.toggleBookmark);
 
+  //============================================================================================================
+  //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
+  //█▀▄ ██▄ ░█░ █▄█ █▀▄ █░▀█
+  //============================================================================================================
   return (
-    <View className="w-[95%] mx-auto">
-      <Link
-        href={{
-          pathname: "/recetas/[id]",
-          params: { id: id_ }, // ✅ param must be "id"
-        }}
-        asChild
-      >
+    //NOTA: El id lo saca del objeto recipe (lo destructura en el Link) y lo pasa como parámetro a la ruta.
+
+    <Link
+      href={{
+        pathname: "/recetas/[id]",
+        params: { id },
+      }}
+      asChild
+    >
+      <View className="w-[95%] mx-auto">
         <TouchableOpacity
-          className="flex-row mb-2 items-start px-3 border border-gray-300"
+          className="flex-row mb-2 items-start px-3 border border-gray-300 "
           style={
             red_hearth
               ? {
@@ -37,7 +44,7 @@ const RecipeCard_FAV = ({
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: 0,
                   shadowRadius: 3,
-                  elevation: 0,
+                  elevation: 0, // Android shadow
                   borderRadius: 2,
                 }
               : undefined
@@ -54,9 +61,9 @@ const RecipeCard_FAV = ({
           />
           <View className="flex-1">
             <Text className="font-semibold text-xl">{title}</Text>
-            <Text className="text-gray-400 text-xl">By {username}</Text>
+            <Text className="text-gray-400 text-xl ">By {username}</Text>
 
-            <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between  ">
               {/* Comment */}
               <View className="items-center">
                 <TouchableOpacity className="relative">
@@ -76,16 +83,23 @@ const RecipeCard_FAV = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Bookmark */}
-              <TouchableOpacity className="relative">
-                <View style={{ transform: [{ scaleX: 1 }] }}>
-                  <Bookmark size={36} strokeWidth={1.5} color="black" />
+              {/* Bookmark*/}
+              <TouchableOpacity
+                className="relative"
+                onPress={() => toggleBookmark(id)}
+              >
+                <View style={{ transform: [{ scaleX: 1.3 }] }}>
+                  <Bookmark
+                    size={36}
+                    strokeWidth={1.5}
+                    color="black"
+                    fill={bookmarked ? "#3B82F6" : "transparent"}
+                  />
                 </View>
               </TouchableOpacity>
 
               <View className="w-2"></View>
 
-              {/* Like button */}
               <TouchableOpacity
                 onPress={() => toggleLike(id)}
                 className="relative"
@@ -107,8 +121,8 @@ const RecipeCard_FAV = ({
             </View>
           </View>
         </TouchableOpacity>
-      </Link>
-    </View>
+      </View>
+    </Link>
   );
 };
 

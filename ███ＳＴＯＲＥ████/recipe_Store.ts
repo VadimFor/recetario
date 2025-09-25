@@ -287,6 +287,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
       await get().fetchAllRecipes();
       await get().fetchUserRecipes(String(user.id));
       await get().fetchUserLikedRecipes(String(user.id));
+      await get().fetchUserBookmarkedRecipes(String(user.id));
 
       console.info(`Recipe "${title}" created successfully!`);
 
@@ -316,7 +317,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
       await get().fetchAllRecipes();
       await get().fetchUserRecipes(String(user.id));
       await get().fetchUserLikedRecipes(String(user.id));
-
+      await get().fetchUserBookmarkedRecipes(String(user.id));
       console.info(`Recipe ${recipeId} deleted successfully!`);
     } catch (err:any) {
       const msg = "Error deleting recipe.";
@@ -342,6 +343,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
       await get().fetchAllRecipes();
       await get().fetchUserRecipes(String(user.id));
       await get().fetchUserLikedRecipes(String(user.id));
+      await get().fetchUserBookmarkedRecipes(String(user.id));
 
       console.info(`Recipe ${recipeId} updated successfully"!`);
     } catch (err: any) {
