@@ -25,7 +25,6 @@ CREATE TABLE recipes (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    image TEXT NOT NULL,
     likes INTEGER DEFAULT 0,
     comments INTEGER DEFAULT 0,
     shares INTEGER DEFAULT 0,
@@ -33,10 +32,22 @@ CREATE TABLE recipes (
     red_hearth BOOLEAN DEFAULT FALSE      -- Frontend flag
 );
 
--- ==============================================================
+-- ======================================================================
+--█▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █ █▀▄▀█ ▄▀█ █▀▀ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █ █░▀░█ █▀█ █▄█ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ======================================================================
+CREATE TABLE recipe_images (
+    image_id INTEGER NOT NULL,
+    recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (image_id, recipe_id)
+);
+
+-- ==================================================================
 --█▀ ▄▀█ █░█ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
 --▄█ █▀█ ▀▄▀ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
--- ==============================================================
+-- ==================================================================
 CREATE TABLE saved_recipes (
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,

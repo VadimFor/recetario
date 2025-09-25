@@ -1,51 +1,11 @@
 import * as FileSystem from "expo-file-system/legacy"; // legacy import to avoid deprecation
-import { useEffect, useState } from "react";
 
 
 export const LOCALHOST_IP = "192.168.1.100";
 const BACKEND_PORT= "3001";
 
-
 const API_BASE_IP = `${LOCALHOST_IP}:${BACKEND_PORT}`;
 
-
-//█░█ █▀█ █▀█ █▄▀
-//█▀█ █▄█ █▄█ █░█
-const useFetch = <T>(fetchFunction: () => Promise<T>, autofetch = true) => {
-    const [data, setData] = useState<T | null>(null);
-    const [error, setError] = useState<Error | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const result = await fetchFunction();
-            setData(result);
-        } catch (err) {
-            setError(err instanceof Error ? err : new Error("An error occurred"));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const reset = () => {
-        setData(null);
-        setLoading(false);
-        setError(null);
-    };
-
-    useEffect(() => {
-        if (autofetch) {
-            fetchData();
-        }
-    }, []);
-
-    return { data, error, loading, fetchData, reset };
-};
-
-export default useFetch;
 /*======================================================
 ██████╗░███████╗░█████╗░███████╗████████╗░█████╗░░██████╗
 ██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝
@@ -84,12 +44,12 @@ export const API_fetchUserRecipes = async  (userId: string)  => {
 };
 //█▀▀ █▀█ █▀▀ ▄▀█ ▀█▀ █▀▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
 //█▄▄ █▀▄ ██▄ █▀█ ░█░ ██▄   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄
-export const API_createRecipe = async (title: string, user_id: string, image: string | undefined) => {
+export const API_createRecipe = async (title: string, user_id: string) => {
   try {
     const response = await fetch(`http://${API_BASE_IP}/create_recipe`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, user_id, image }),
+      body: JSON.stringify({ title, user_id}),
     });
 
     if (!response.ok) throw new Error();
@@ -123,7 +83,6 @@ export const API_deleteRecipe = async (recipeId: string, userId: string) => {
   }
 }
 
-
 //█▀▀ █▀▄ █ ▀█▀ ▄▀█ █▀█   █▀█ █▀▀ █▀▀ █▀▀ ▀█▀ ▄▀█ 
 //██▄ █▄▀ █ ░█░ █▀█ █▀▄   █▀▄ ██▄ █▄▄ ██▄ ░█░ █▀█
 export const API_editRecipe = async (recipeId: string, userId: string, newTitle: string) => {
@@ -138,6 +97,32 @@ export const API_editRecipe = async (recipeId: string, userId: string, newTitle:
   }
 
   return response.json();
+};
+
+//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀ █▀
+//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄ ▄█
+export const API_addRecipePictures = async (imageUris: string[],  userId: string, recipeId: string) => {
+  try {
+    // Convertimos cada URI de imagen en base64 para enviarla al backend
+    const base64s = await Promise.all(
+      imageUris.map((uri) => FileSystem.readAsStringAsync(uri, { encoding: "base64" }))
+    );
+
+    // Enviamos la colección de imágenes al backend
+    const response = await fetch(`http://${API_BASE_IP}/upload-recipe-pictures`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base64s, userId, recipeId }),
+    });
+
+    if (!response.ok) throw new Error("Upload recipe picture failed");
+    // Devolvemos el listado de imágenes que el backend confirmó como guardadas
+    const { images } = await response.json();
+    return images;
+  } catch (error) {
+    console.error("(uploadImageToSupabase) Error: ", error);
+    throw error;
+  }
 };
 
 /*==============================================================================================================================
@@ -567,8 +552,8 @@ export const API_changeAvatar = async (fileUri: string, userId: string) => {
   });
 
   if (!response.ok) throw new Error("Upload failed");
-  const { url } = await response.json();
-  return url;
+    const { avatar } = await response.json();
+    return avatar;
   } catch (error) {
     console.error("(uploadImageToSupabase) Error:", error);
     throw error;

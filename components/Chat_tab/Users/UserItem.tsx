@@ -1,6 +1,6 @@
 import { ConfirmModal } from "@/components/MODALS/ConfirmModal";
-import { useAuthStore } from "@/store/authStore";
-import { useChatStore } from "@/store/chatStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { useChatStore } from "@/███ＳＴＯＲＥ████/chat_Store";
 import { Link } from "expo-router";
 import { UserPlus } from "lucide-react-native";
 import React, { useState } from "react";

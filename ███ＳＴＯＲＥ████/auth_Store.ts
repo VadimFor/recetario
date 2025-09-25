@@ -1,16 +1,15 @@
 //npm install zustand
 //npx expo install @react-native-async-storage/async-storage
 //---------------------------------------------------------------
-import { API_changeAvatar, API_login, API_registerUser } from "@/API_CALLS";
 import { User } from "@/props/props";
-import { ws_connectWebSocket, ws_disconnectWebSocket } from "@/SERVER/websocket_client";
+import { ws_connectWebSocket, ws_disconnectWebSocket } from "@/███ＳＥＲＶＥＲ███/websocket_client";
+import { API_changeAvatar, API_login, API_registerUser } from "@/ＡＰＩ_ＣＡＬＬＳ";
 import * as ImagePicker from "expo-image-picker";
 import { create } from "zustand";
-import { useChatStore } from "./chatStore";
-import { useRecipeStore } from "./recipeStore";
+import { useChatStore } from "./chat_Store";
+import { useRecipeStore } from "./recipe_Store";
 
 interface AuthState {
-  isUserAuthenticated: boolean;
   user: User | null;
   isLoading: boolean;
 
@@ -22,7 +21,6 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set,get) => ({
-  isUserAuthenticated: false,
   user: null,
   isLoading: false,
 
@@ -31,9 +29,8 @@ export const useAuthStore = create<AuthState>((set,get) => ({
   changeAvatar: async () => {
     const user = get().user;
     if (!user?.id) return;
+    const { recipes } = useRecipeStore.getState();
 
-    console.log("changing avatar, api_secret: ");
-    console.log(process.env.CLOUDINARY_API_SECRET);
 
     // Pick image
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,9 +51,21 @@ export const useAuthStore = create<AuthState>((set,get) => ({
     const pickedImageUri = result.assets[0].uri;
 
     try {
-      const uploadedUrl = await API_changeAvatar(pickedImageUri, user.id);
-      console.log("Uploaded avatar URL:", uploadedUrl);
-      set({ user: { ...user, avatar: uploadedUrl } });
+      const avatar_url = await API_changeAvatar(pickedImageUri, user.id);
+      console.log("Uploaded avatar URL:", avatar_url);
+      const cacheBustedUrl = `${avatar_url}?t=${Date.now()}`;
+
+      set({ user: { ...user, avatar:cacheBustedUrl,} });
+
+      // 2. Update all recipes of this user in recipe store
+      useRecipeStore.setState({
+        recipes: recipes.map((r) =>
+          r.user_id === user.id
+            ? { ...r, user_avatar: cacheBustedUrl }
+            : r
+        ),
+      });
+
     } catch (error) {
       console.error("Avatar upload failed:", error);
       alert("Failed to upload avatar.");
@@ -90,10 +99,13 @@ export const useAuthStore = create<AuthState>((set,get) => ({
     set({ isLoading: true });
 
     try {
-      const db_user: User = await API_login(emailOrUsername, password);
+      let db_user: User = await API_login(emailOrUsername, password);
 
       if (db_user) {
-        set({ user: db_user, isUserAuthenticated: true });
+
+        db_user = { ...db_user, avatar: `${db_user.avatar}?t=${Date.now()}` }; // bust cache
+
+        set({ user: db_user});
 
         // reconnect websocket with new user
         ws_disconnectWebSocket();
@@ -104,8 +116,8 @@ export const useAuthStore = create<AuthState>((set,get) => ({
         throw new Error("No user returned from API");
       }
     } catch (error) {
-      console.error("[AuthStore] Error fetching authenticated user:", error);
-      set({ user: null, isUserAuthenticated: false });
+      console.error("[AuthStore] Error fetching user:", error);
+      set({ user: null });
       ws_disconnectWebSocket();
     } finally {
       set({ isLoading: false });
@@ -129,7 +141,7 @@ export const useAuthStore = create<AuthState>((set,get) => ({
       const reg_user: User = await API_registerUser(email,username, password );
 
       if (reg_user) {
-        set({ user: reg_user, isUserAuthenticated: true });
+        set({ user: reg_user});
 
         // reconnect websocket with new user
         ws_disconnectWebSocket();
@@ -143,7 +155,7 @@ export const useAuthStore = create<AuthState>((set,get) => ({
       }
     } catch (error) {
       console.error("[AuthStore] Error registering user:", error);
-      set({ user: null, isUserAuthenticated: false });
+      set({ user: null });
       ws_disconnectWebSocket();
 
       return null;

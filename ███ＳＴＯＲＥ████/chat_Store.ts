@@ -1,5 +1,5 @@
-import { API_addFriend, API_create_individual_Chat, API_deleteChat, API_deleteChatMessages, API_fetchChats, API_fetchOlderMessages, API_getFriends, API_markChatAsRead, API_removeFriend, API_sendMessage } from "@/API_CALLS";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { API_addFriend, API_create_individual_Chat, API_deleteChat, API_deleteChatMessages, API_fetchChats, API_fetchOlderMessages, API_getFriends, API_markChatAsRead, API_removeFriend, API_sendMessage } from "@/ＡＰＩ_ＣＡＬＬＳ";
 import { create } from "zustand";
 
 export type MessageProp = {

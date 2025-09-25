@@ -2,9 +2,8 @@
 PARA LA PESTAÑA DE "MIS RECETAS"
 */
 
-import { recipeImages } from "@/assets/recipeImages";
 import { Recipe } from "@/props/props";
-import { useRecipeStore } from "@/store/recipeStore";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import { Link } from "expo-router";
 import {
   Heart,
@@ -28,11 +27,11 @@ const RecipeCard_MIS = ({
   title,
   user_id,
   username,
-  image,
   likes,
   comments,
   shares,
   red_hearth,
+  recipe_images,
 }: Recipe) => {
   const { deleteRecipe } = useRecipeStore();
 
@@ -46,8 +45,7 @@ const RecipeCard_MIS = ({
     setDeleteModalVisible(false);
   };
 
-  const recipeImage =
-    recipeImages[image] ?? require("../../assets/recipes/default.png");
+  //console.log("recipe_images for", id, recipe_images);
 
   //============================================================================================================
   //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
@@ -77,7 +75,13 @@ const RecipeCard_MIS = ({
             {/*█ █▀▄▀█ ▄▀█ █▀▀ █▀▀ █▄░█
                █ █░▀░█ █▀█ █▄█ ██▄ █░▀█*/}
             <Image
-              source={recipeImage}
+              source={
+                recipe_images &&
+                recipe_images.length > 0 &&
+                recipe_images[0].url
+                  ? { uri: recipe_images[0].url }
+                  : require("@/assets/recipes/default.png")
+              }
               className="w-full h-52 rounded-lg"
               resizeMode="cover"
             />
@@ -94,7 +98,6 @@ const RecipeCard_MIS = ({
 
                 <View className="flex-1 flex-row items-center justify-center ">
                   <Send size={30} color="#6b7280" />
-                  <Text className="font-bold text-gray-500">{shares}</Text>
                 </View>
 
                 <View className="flex-1 flex-row items-center justify-center ">

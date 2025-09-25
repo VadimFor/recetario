@@ -1,16 +1,20 @@
 // npm install express pg cors
-require("dotenv").config();
+require("dotenv").config({ path: "../.env" });
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const { createClient } = require("@supabase/supabase-js");
-const { decode } = require("base64-arraybuffer");
+const { decode } = require("base64-arraybuffer");  // npm i uuid
+
 
 const app = express();
 const PORT = 3001;
 
 app.use(cors()); // Allow frontend requests
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -39,16 +43,43 @@ app.get("/", (req, res) => {
 app.get("/recipes", async (req, res) => {
   try {
     console.log("Fetching recipes from the database...");
+    
     const result = await pool.query(`
-      SELECT r.*, u.username, u.avatar
+      SELECT 
+        r.*,
+        u.username,
+        u.avatar as user_avatar,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'image_id', ri.image_id,
+              'url', ri.url,
+              'created_at', ri.created_at
+            )
+          ) FILTER (WHERE ri.image_id IS NOT NULL), 
+          '[]'
+        ) AS recipe_images
       FROM recipes r
-      JOIN users u on r.user_id = u.id
-      ORDER By r.created_at DESC
+      JOIN users u ON r.user_id = u.id
+      LEFT JOIN recipe_images ri ON r.id = ri.recipe_id
+      GROUP BY r.id, u.username, u.avatar
+      ORDER BY r.created_at DESC
     `);
+
+    //para bustear el cache del avatar del usuario y que se vea la nueva imagen si hay
+    res.json(
+      result.rows.map(r => ({
+        ...r,
+        user_avatar: r.user_avatar 
+          ? `${r.user_avatar}?t=${Date.now()}` 
+          : null,
+          }))
+    );
+
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching recipes:", err);
-    res.status(500).json({ error: "Internal server error. Database with that name might not exist." });
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
@@ -58,12 +89,30 @@ app.get("/recipes/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     console.log("Fetching user recipes from the database...");
+
     const result = await pool.query(`
-      SELECT r.*
+      SELECT 
+        r.*,
+        u.username,
+        u.avatar,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'image_id', ri.image_id,
+              'url', ri.url,
+              'created_at', ri.created_at
+            )
+          ) FILTER (WHERE ri.image_id IS NOT NULL), 
+          '[]'
+        ) AS recipe_images
       FROM recipes r
-      WHERE user_id = $1
-      ORDER By r.created_at DESC
+      JOIN users u ON r.user_id = u.id
+      LEFT JOIN recipe_images ri ON r.id = ri.recipe_id
+      WHERE r.user_id = $1
+      GROUP BY r.id, u.username, u.avatar
+      ORDER BY r.created_at DESC
     `, [userId]);
+
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching user recipes:", err);
@@ -76,16 +125,11 @@ app.get("/recipes/:userId", async (req, res) => {
 // Crear nueva receta
 app.post("/create_recipe", async (req, res) => {
   try {
-    const { title, user_id, image } = req.body;
+    const {title, user_id} = req.body;
 
     if (!title || !user_id) {
       return res.status(400).json({ error: "Missing required fields (title, user_id)" });
     }
-    
-    // fallback image if none provided
-    const finalImage = image && image.trim() !== "" 
-      ? image 
-      : "default.png";   
 
     // FIX DE LA SECUENCIA SETVAL (lo del id incremental)
     const maxIdResult = await pool.query(`SELECT MAX(id) AS max_id FROM recipes`);
@@ -93,10 +137,10 @@ app.post("/create_recipe", async (req, res) => {
     await pool.query(`SELECT setval('recipes_id_seq', $1, false)`, [maxId + 1]);
 
     const result = await pool.query(
-      `INSERT INTO recipes (title, user_id, image) 
-       VALUES ($1, $2, $3) 
+      `INSERT INTO recipes (title, user_id) 
+       VALUES ($1, $2) 
        RETURNING *`,
-      [title, user_id, finalImage]
+      [title, user_id]
     );
 
     res.status(201).json(result.rows[0]);
@@ -133,6 +177,76 @@ app.delete("/delete_recipe", async (req, res) => {
   } catch (err) {
     console.error("Error deleting recipe:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//▄▀█ █▀▄ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀   █▀█ █ █▀▀ ▀█▀ █░█ █▀█ █▀▀ █▀
+//█▀█ █▄▀ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄   █▀▀ █ █▄▄ ░█░ █▄█ █▀▄ ██▄ ▄█
+app.post("/upload-recipe-pictures", async (req, res) => {
+  try {
+    const { base64s, userId, recipeId } = req.body;
+
+    //compruebo que todos los archivos están bien
+    if (!Array.isArray(base64s) || base64s.length === 0 || !userId || !recipeId) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    //Obtengo el maximo id para introducir en supabase s3 storage
+    const max_id = await pool.query(
+      `SELECT COALESCE(MAX(image_id), 0) AS max_id FROM recipe_images WHERE recipe_id = $1`,
+      [recipeId]
+    );
+
+    let nextImageId = max_id.rows[0].max_id;
+    const uploadedImages = [];
+
+    //recorro el array de imagenes seleccionadas, los meto en supabase y en la db de la app
+    for (const rawBase64 of base64s) {
+
+       //miro si es correcto el uri
+      const cleanedBase64 = typeof rawBase64 === "string" ? rawBase64.split(",").pop() : null;
+      if (!cleanedBase64) {
+        return res.status(400).json({ error: "Invalid image payload." });
+      }
+
+      //subo la imagen a supabase
+      nextImageId += 1;
+      const imageName = `${nextImageId}.jpg`;
+      const filePath = `images_users/${userId}/recipes/${recipeId}/${imageName}`;
+      const arrayBuffer = decode(cleanedBase64);
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("recetarium")
+        .upload(filePath, arrayBuffer, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError.message);
+        return res.status(500).json({ error: uploadError.message });
+      }
+
+      const { data: publicData } = supabase.storage.from("recetarium").getPublicUrl(filePath);
+      const imageUrl = publicData?.publicUrl;
+
+      if (!imageUrl) {
+        console.error("Failed to obtain public URL for", filePath);
+        return res.status(500).json({ error: "Failed to generate public URL." });
+      }
+
+      //meto la imagen en mi base de datos de la app
+      const insertResult = await pool.query(
+        `INSERT INTO recipe_images (image_id, recipe_id, url) VALUES ($1, $2, $3) RETURNING *`,
+        [nextImageId, recipeId, imageUrl]
+      );
+      //añado el public url de supabase para que se vean en el front
+      uploadedImages.push(insertResult.rows[0]);
+    }
+
+    res.json({ images: uploadedImages }); //devuelvo los public url de las imagenes subidas
+  } catch (e) {
+    console.error("upload-recipe-pictures error:", e);
+    res.status(500).json({ error: "Failed to upload recipe pictures." });
   }
 });
 
@@ -664,7 +778,6 @@ app.post("/register", async (req, res) => {
 
 //█▀▀ █░█ ▄▀█ █▄░█ █▀▀ █▀▀   ▄▀█ █░█ ▄▀█ ▀█▀ ▄▀█ █▀█
 //█▄▄ █▀█ █▀█ █░▀█ █▄█ ██▄   █▀█ ▀▄▀ █▀█ ░█░ █▀█ █▀▄
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 app.post("/upload-avatar", async (req, res) => {
 
   try{
@@ -682,11 +795,11 @@ app.post("/upload-avatar", async (req, res) => {
 
     const url = supabase.storage.from("recetarium").getPublicUrl(data.path).data.publicUrl;
 
-    const result = await pool.query(`
-      UPDATE users set avatar_url=$1 WHERE id = $2
+    await pool.query(`
+      UPDATE users set avatar=$1 WHERE id = $2
     `, [url, userId]);
 
-    res.json({ url: url });
+    res.json({ avatar: url });
   
   }catch(e){
     console.log(e);

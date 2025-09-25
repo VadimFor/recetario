@@ -1,7 +1,7 @@
 import arrow_left from "@/assets/icons/left-arrow.png";
 import { recipeImages } from "@/assets/recipeImages";
 import Stat from "@/components/Stat";
-import { useRecipeStore } from "@/store/recipeStore";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import { router, useLocalSearchParams } from "expo-router";
 import { Heart, MessageCircle, Send } from "lucide-react-native";
 import React from "react";

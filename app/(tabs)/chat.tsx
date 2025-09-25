@@ -1,9 +1,9 @@
 import { ChatItem } from "@/components/Chat_tab/Chats/ChatItem";
 import { UserItem } from "@/components/Chat_tab/Users/UserItem";
 import SearchBar from "@/components/SearchBar";
-import { ws_subscribeToChats } from "@/SERVER/websocket_client";
-import { useAuthStore } from "@/store/authStore";
-import { useChatStore } from "@/store/chatStore";
+import { ws_subscribeToChats } from "@/███ＳＥＲＶＥＲ███/websocket_client";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { useChatStore } from "@/███ＳＴＯＲＥ████/chat_Store";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,

@@ -1,12 +1,12 @@
 import RecipeList from "@/components/RecipeList";
-import { useAuthStore } from "@/store/authStore";
-import { useRecipeStore } from "@/store/recipeStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import * as NavigationBar from "expo-navigation-bar";
 import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 
 export default function Index() {
-  const { user, isUserAuthenticated, isLoading } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
   const { fetchAllRecipes, fetchUserLikedRecipes } = useRecipeStore();
 
   //█░█ █▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ ▀█▀
@@ -17,7 +17,7 @@ export default function Index() {
     const init = async () => {
       NavigationBar.setVisibilityAsync("hidden");
 
-      if (!isUserAuthenticated && !isLoading) {
+      if (user?.id && !isLoading) {
         try {
           // await fetchAuthenticatedUser("1");
         } catch (error) {
@@ -59,7 +59,7 @@ export default function Index() {
       <View className="bg-green-600 pt-10 px-5">
         <Text className="text-white text-3xl font-bold">Recetas</Text>
       </View>
-      <RecipeList />
+      <RecipeList recipes={[]} />
     </View>
   );
 }

@@ -1,7 +1,7 @@
 import { recipeImages } from "@/assets/recipeImages";
 import Stat from "@/components/Stat";
 import { Recipe } from "@/props/props";
-import { useRecipeStore } from "@/store/recipeStore";
+import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import { Link } from "expo-router";
 import { Heart, MessageCircle, Send } from "lucide-react-native";
 import React from "react";

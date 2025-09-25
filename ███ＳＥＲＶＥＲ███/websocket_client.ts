@@ -1,6 +1,6 @@
-import { LOCALHOST_IP } from "@/API_CALLS";
-import { useAuthStore } from "@/store/authStore";
-import { ChatProps, MessageProp, useChatStore } from "@/store/chatStore";
+import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
+import { ChatProps, MessageProp, useChatStore } from "@/███ＳＴＯＲＥ████/chat_Store";
+import { LOCALHOST_IP } from "@/ＡＰＩ_ＣＡＬＬＳ";
 
 let socket: WebSocket | null = null;
 
@@ -65,14 +65,14 @@ export const ws_connectWebSocket = (userId: string) => {
 
     const { user } = useAuthStore.getState();
     if (user?.id){
-      scheduleReconnect();
+      //scheduleReconnect();
     }
   };
   
   //█▀█ █▄░█   █▀▀ █▀█ █▀█ █▀█ █▀█   █▀▀ █▀█ █▀█ █▀▄▀█   █▀ █▀▀ █▀█ █░█ █▀▀ █▀█
   //█▄█ █░▀█   ██▄ █▀▄ █▀▄ █▄█ █▀▄   █▀░ █▀▄ █▄█ █░▀░█   ▄█ ██▄ █▀▄ ▀▄▀ ██▄ █▀▄
   socket.onerror = (err) => {
-    console.error("⚠️ WebSocket error:", err);
+    console.warn("⚠️ WebSocket error:", err);
   };
 };
 
