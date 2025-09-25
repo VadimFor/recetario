@@ -30,6 +30,7 @@ CREATE TABLE recipes (
     shares INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     red_hearth BOOLEAN DEFAULT FALSE      -- Frontend flag
+    bookmarked BOOLEAN DEFAULT FALSE      -- Frontend flag
 );
 
 -- ======================================================================
@@ -48,12 +49,24 @@ CREATE TABLE recipe_images (
 --█▀ ▄▀█ █░█ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
 --▄█ █▀█ ▀▄▀ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
 -- ==================================================================
-CREATE TABLE saved_recipes (
+CREATE TABLE liked_recipes (
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (user_id, recipe_id)
 );
+
+-- ==================================================================
+--█▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
+--█▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█   ░█░ █▀█ █▄█ █▄▄ ██▄
+-- ==================================================================
+CREATE TABLE bookmarked_recipes (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (user_id, recipe_id)
+);
+
 
 -- ==============================================================
 --█▀▀ █░█ ▄▀█ ▀█▀ █▀   ▀█▀ ▄▀█ █▄▄ █░░ █▀▀
@@ -157,22 +170,9 @@ VALUES
 --█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀
 --█ █░▀█ ▄█ ██▄ █▀▄ ░█░   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█
 -- ===============================================
-INSERT INTO recipes (id, title, user_id, image, likes, comments, shares)
-VALUES
-(1, 'Mediterranean Quinoa Salad', 1, 'quinoa-salad.png', 234, 56, 34),
-(2, 'Spicy Thai Green Curry', 2, 'green-curry.png', 189, 42, 25),
-(3, 'Classic French Onion Soup', 3, 'onion-soup.png', 312, 78, 45),
-(4, 'Homemade Pasta Carbonara', 4, 'carbonara.png', 276, 65, 38),
-(5, 'Korean Bibimbap Bowl', 5, 'bibimbap.png', 198, 39, 27),
-(6, 'Moroccan Chickpea Tagine', 6, 'chickpea-tagine.png', 251, 44, 31),
-(7, 'Japanese Ramen Noodles', 7, 'ramen.png', 329, 81, 50),
-(8, 'Indian Butter Chicken', 8, 'butter-chicken.png', 288, 60, 42),
-(9, 'Vegan Avocado Toast', 9, 'avocado-toast.png', 172, 36, 20),
-(10, 'Argentinian Steak with Chimichurri', 10, 'chimichurri-steak.png', 310, 70, 47),
-(11, 'Peruvian Ceviche', 11, 'ceviche.png', 206, 49, 29),
-(12, 'Greek Moussaka', 12, 'moussaka.png', 239, 53, 33),
-(13, 'Vietnamese Pho', 13, 'pho.png', 297, 67, 41),
-(14, 'Mexican Street Tacos', 14, 'street-tacos.png', 342, 84, 55);
+
+--FALTA
+
 
 -- ===============================
 --█ █▄░█ █▀ █▀▀ █▀█ ▀█▀   █ █▄░█ █▀▄ █ █░█ █ █▀▄ █░█ ▄▀█ █░░   █▀▀ █░█ ▄▀█ ▀█▀ █▀

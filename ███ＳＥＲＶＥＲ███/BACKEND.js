@@ -271,7 +271,7 @@ app.post("/upload-recipe-pictures", async (req, res) => {
 app.get("/users/:userId/liked", async (req, res) => {
   const { userId } = req.params;
   const liked = await pool.query(
-    "SELECT recipe_id FROM saved_recipes WHERE user_id = $1",
+    "SELECT recipe_id FROM liked_recipes WHERE user_id = $1",
     [userId]
   );
   res.json(liked.rows);
@@ -284,7 +284,7 @@ app.post("/recipes/:id/like", async (req, res) => {
   const { user_id } = req.body;
 
   await pool.query(
-    "INSERT INTO saved_recipes (user_id, recipe_id) VALUES ($1, $2)",
+    "INSERT INTO liked_recipes (user_id, recipe_id) VALUES ($1, $2)",
     [user_id, id]
   );
 
@@ -303,7 +303,7 @@ app.delete("/recipes/:id/unlike", async (req, res) => {
   const { user_id } = req.body;
 
   await pool.query(
-    "DELETE FROM saved_recipes WHERE user_id = $1 AND recipe_id = $2",
+    "DELETE FROM liked_recipes WHERE user_id = $1 AND recipe_id = $2",
     [user_id, id]
   );
 
@@ -315,6 +315,51 @@ app.delete("/recipes/:id/unlike", async (req, res) => {
   res.json({ success: true });
 });
 
+/*===========================================================================================================================================
+██████╗░███████╗░█████╗░███████╗████████╗░█████╗░░██████╗ ██████╗░░█████╗░░█████╗░██╗░░██╗███╗░░░███╗░█████╗░██████╗░██╗░░██╗███████╗██████╗░
+██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝ ██╔══██╗██╔══██╗██╔══██╗██║░██╔╝████╗░████║██╔══██╗██╔══██╗██║░██╔╝██╔════╝██╔══██╗
+██████╔╝█████╗░░██║░░╚═╝█████╗░░░░░██║░░░███████║╚█████╗░ ██████╦╝██║░░██║██║░░██║█████═╝░██╔████╔██║███████║██████╔╝█████═╝░█████╗░░██║░░██║
+██╔══██╗██╔══╝░░██║░░██╗██╔══╝░░░░░██║░░░██╔══██║░╚═══██╗ ██╔══██╗██║░░██║██║░░██║██╔═██╗░██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗░██╔══╝░░██║░░██║
+██║░░██║███████╗╚█████╔╝███████╗░░░██║░░░██║░░██║██████╔╝ ██████╦╝╚█████╔╝╚█████╔╝██║░╚██╗██║░╚═╝░██║██║░░██║██║░░██║██║░╚██╗███████╗██████╔╝
+╚═╝░░╚═╝╚══════╝░╚════╝░╚══════╝░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░ ╚═════╝░░╚════╝░░╚════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚══════╝╚═════╝░*/
+//█▀▀ █▀▀ ▀█▀   █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀
+//█▄█ ██▄ ░█░   █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█
+app.get("/users/:userId/liked", async (req, res) => {
+  const { userId } = req.params;
+  const liked = await pool.query(
+    "SELECT recipe_id FROM bookmarked_recipes WHERE user_id = $1",
+    [userId]
+  );
+  res.json(liked.rows);
+});
+
+//█▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
+//█▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄
+app.post("/recipes/:id/bookmark", async (req, res) => {
+  const { id } = req.params;
+  const { user_id } = req.body;
+
+  await pool.query(
+    "INSERT INTO bookmarked_recipes (user_id, recipe_id) VALUES ($1, $2)",
+    [user_id, id]
+  );
+
+  res.json({ success: true });
+});
+
+//█░█ █▄░█ █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
+//█▄█ █░▀█ █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄
+app.delete("/recipes/:id/unbookmark", async (req, res) => {
+  const { id } = req.params;
+  const { user_id } = req.body;
+
+  await pool.query(
+    "DELETE FROM bookmarked_recipes WHERE user_id = $1 AND recipe_id = $2",
+    [user_id, id]
+  );
+
+  res.json({ success: true });
+});
 
 //=================================
 //░█████╗░██╗░░██╗░█████╗░████████╗

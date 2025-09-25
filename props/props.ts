@@ -15,6 +15,7 @@ export type Recipe = {
   comments: number;
   shares: number;
   red_hearth: boolean;
+  bookmarked: boolean;
   user_id: string;
   username: string;
   user_avatar: string
