@@ -66,6 +66,16 @@ app.get("/recipes", async (req, res) => {
       ORDER BY r.created_at DESC
     `);
 
+    //para bustear el cache del avatar del usuario y que se vea la nueva imagen si hay
+    res.json(
+      result.rows.map(r => ({
+        ...r,
+        user_avatar: r.user_avatar 
+          ? `${r.user_avatar}?t=${Date.now()}` 
+          : null,
+          }))
+    );
+
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching recipes:", err);

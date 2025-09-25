@@ -29,6 +29,8 @@ export const useAuthStore = create<AuthState>((set,get) => ({
   changeAvatar: async () => {
     const user = get().user;
     if (!user?.id) return;
+    const { recipes } = useRecipeStore.getState();
+
 
     // Pick image
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -51,7 +53,19 @@ export const useAuthStore = create<AuthState>((set,get) => ({
     try {
       const avatar_url = await API_changeAvatar(pickedImageUri, user.id);
       console.log("Uploaded avatar URL:", avatar_url);
-      set({ user: { ...user, avatar:`${avatar_url}?t=${Date.now()}`,} });
+      const cacheBustedUrl = `${avatar_url}?t=${Date.now()}`;
+
+      set({ user: { ...user, avatar:cacheBustedUrl,} });
+
+      // 2. Update all recipes of this user in recipe store
+      useRecipeStore.setState({
+        recipes: recipes.map((r) =>
+          r.user_id === user.id
+            ? { ...r, user_avatar: cacheBustedUrl }
+            : r
+        ),
+      });
+
     } catch (error) {
       console.error("Avatar upload failed:", error);
       alert("Failed to upload avatar.");

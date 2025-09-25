@@ -110,10 +110,10 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
   fetchAllRecipes: async () => {
     try {
       set({ loading: true, error: null });
-      const all_recipes = await API_fetchRecipes();
+      const all_recipes : Recipe[] = await API_fetchRecipes();
 
       set({ recipes: all_recipes, loading: false });
-      
+
     } catch (err) {
       set({ error: err instanceof Error ? err.message : "Error fetching recipes", loading: false });
     }
