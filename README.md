@@ -1,3 +1,6 @@
+# 📱 Recetario
+![Progress Screenshot](assets/phone.png)
+
 ## 🚀 Project Overview
 Recetario is a **full-stack social app** focused on **sharing and discovering recipes**.  
 The main goal is to create a platform for **social interactions** around cooking.
