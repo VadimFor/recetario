@@ -1,4 +1,4 @@
-# 📱 Recetario
+# 📱 Recetario (in progress...)
 ![Progress Screenshot](assets/phone.png)
 
 ## 🚀 Project Overview
