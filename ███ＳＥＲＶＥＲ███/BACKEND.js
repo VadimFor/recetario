@@ -854,18 +854,6 @@ app.post("/upload-avatar", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 //================================== START SERVER ===============================================================
 //===============================================================================================================
 // MUY IMPORTANTE PONER 0.0.0.0 PARA QUE SEA ACCESIBLE DESDE EL DISPOSITIVO MOVIL (POR EJEMPLO, si mi IP
