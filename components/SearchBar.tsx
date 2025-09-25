@@ -17,7 +17,7 @@ const SearchBar = ({ placeholder, onPress, onChangeText, value }: Props) => {
   //█▀▄ ██▄ ░█░ █▄█ █▀▄ █░▀█
   //============================================================================================================
   return (
-    <View className="flex-row items-center bg-gray-300 rounded-3xl px-7 pb-1 mx-4 mb-1">
+    <View className="flex-row items-center bg-gray-300 rounded-3xl px-7  mx-4 mb-4">
       <Image
         source={search_icon}
         className="size-5"

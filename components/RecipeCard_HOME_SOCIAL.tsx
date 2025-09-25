@@ -98,7 +98,7 @@ const RecipeCard_HOME_SOCIAL = ({
 
         {/* Right: Bookmark + Like */}
         <View className="flex-row items-center space-x-4">
-          {/* Bookmark (optional count inside) */}
+          {/* Bookmark*/}
           <TouchableOpacity className="relative">
             <View style={{ transform: [{ scaleX: 1.3 }] }}>
               <Bookmark size={36} strokeWidth={1.5} color="black" />

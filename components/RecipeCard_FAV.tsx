@@ -1,9 +1,7 @@
-import { recipeImages } from "@/assets/recipeImages";
-import Stat from "@/components/Stat";
 import { Recipe } from "@/props/props";
 import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import { Link } from "expo-router";
-import { Heart, MessageCircle, Send } from "lucide-react-native";
+import { Bookmark, Heart, MessageCircle, Send } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
@@ -17,11 +15,9 @@ const RecipeCard_FAV = ({
   comments,
   shares,
   red_hearth,
+  recipe_images,
 }: Recipe) => {
   const toggleLike = useRecipeStore((state) => state.toggleLike);
-
-  const recipeImage =
-    recipeImages[image] ?? require("../assets/recipes/default.png");
 
   //============================================================================================================
   //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
@@ -54,31 +50,65 @@ const RecipeCard_FAV = ({
           }
         >
           <Image
-            source={recipeImage}
+            source={
+              recipe_images && recipe_images.length > 0 && recipe_images[0].url
+                ? { uri: recipe_images[0].url }
+                : require("@/assets/recipes/default.png")
+            }
             className="w-[90px] h-[90px] rounded-md mr-4 mt-1 mb-1"
             resizeMode="cover"
           />
           <View className="flex-1">
             <Text className="font-semibold text-xl">{title}</Text>
-            <Text className="text-gray-400 text-xl mb-2">By {username}</Text>
-            <View className="flex-row justify-start">
-              <Stat
-                icon={<MessageCircle size={30} color="#6b7280" />}
-                value={comments}
-              />
-              <Stat icon={<Send size={30} color="#6b7280" />} value={shares} />
-              <Stat
-                icon={
-                  <TouchableOpacity onPress={() => toggleLike(id)}>
-                    <Heart
-                      size={30}
-                      color={red_hearth ? "red" : "#d97706"}
-                      fill={red_hearth ? "red" : "none"}
-                    />
-                  </TouchableOpacity>
-                }
-                value={likes}
-              />
+            <Text className="text-gray-400 text-xl ">By {username}</Text>
+
+            <View className="flex-row items-center justify-between  ">
+              {/* Comment */}
+              <View className="items-center">
+                <TouchableOpacity className="relative">
+                  <View style={{ transform: [{ scaleX: 1.3 }] }}>
+                    <MessageCircle size={36} strokeWidth={1.5} color="black" />
+                  </View>
+                  <Text className="absolute inset-0 text-xs font-bold text-center top-1/2 -translate-y-1/2 text-black">
+                    {comments}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Share */}
+              <View className="items-center">
+                <TouchableOpacity className="relative">
+                  <Send size={36} color="black" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Bookmark*/}
+              <TouchableOpacity className="relative">
+                <View style={{ transform: [{ scaleX: 1 }] }}>
+                  <Bookmark size={36} strokeWidth={1.5} color="black" />
+                </View>
+              </TouchableOpacity>
+
+              <View className="w-2"></View>
+
+              <TouchableOpacity
+                onPress={() => toggleLike(id)}
+                className="relative"
+              >
+                <Heart
+                  size={54}
+                  strokeWidth={1}
+                  color="black"
+                  fill={red_hearth ? "red" : "transparent"}
+                />
+                <Text
+                  className={`absolute inset-0 text-xs font-bold text-center top-1/2 -translate-y-1/2 ${
+                    red_hearth ? "text-white" : "text-black"
+                  }`}
+                >
+                  {likes}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>

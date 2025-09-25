@@ -99,12 +99,14 @@ const MisRecetas = ({ showAddButton = true }) => {
 
   return (
     <View className="flex-1 bg-gray-100">
-      <SafeAreaView className="bg-white flex-1 pt-1">
-        <SearchBar
-          value={searchTerm}
-          onChangeText={setSearchTerm}
-          placeholder="Search recipes"
-        />
+      <SafeAreaView className="bg-white flex-1">
+        <View className="mt-2">
+          <SearchBar
+            value={searchTerm}
+            onChangeText={setSearchTerm}
+            placeholder="Search recipes"
+          />
+        </View>
 
         {loading ? (
           <View
@@ -126,7 +128,7 @@ const MisRecetas = ({ showAddButton = true }) => {
               </View>
             }
             numColumns={2}
-            className="mt-2 pb-32 ml-2 mr-3"
+            className="pb-32 ml-2 mr-3"
             columnWrapperStyle={{
               justifyContent: "flex-start",
               gap: 1,
