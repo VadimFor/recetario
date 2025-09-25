@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 
 export default function Index() {
-  const { user, isUserAuthenticated, isLoading } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
   const { fetchAllRecipes, fetchUserLikedRecipes } = useRecipeStore();
 
   //█░█ █▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ ▀█▀
@@ -17,7 +17,7 @@ export default function Index() {
     const init = async () => {
       NavigationBar.setVisibilityAsync("hidden");
 
-      if (!isUserAuthenticated && !isLoading) {
+      if (user?.id && !isLoading) {
         try {
           // await fetchAuthenticatedUser("1");
         } catch (error) {

@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const Favoritos = () => {
-  const { user, isUserAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const { fetchAllRecipes, fetchUserLikedRecipes } = useRecipeStore();
 
   //█░█ █▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ ▀█▀
@@ -61,6 +61,7 @@ const Favoritos = () => {
       <RecipeList
         filter={(recipe) => recipe.red_hearth} // ✅ Only show liked recipes
         isFavTab={true}
+        recipes={[]}
       />
     </View>
   );

@@ -19,7 +19,7 @@ import {
 } from "react-native";
 
 const MisRecetas = ({ showAddButton = true }) => {
-  const { user, isUserAuthenticated, isLoading } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
   const {
     user_recipes,
     loading,
@@ -44,7 +44,7 @@ const MisRecetas = ({ showAddButton = true }) => {
 
     const init = async () => {
       NavigationBar.setVisibilityAsync("hidden");
-      if (isUserAuthenticated && !isLoading && user?.id !== undefined) {
+      if (user?.id && !isLoading && user?.id !== undefined) {
         await fetchUserRecipes(String(user.id));
         if (cancelled) return;
       }

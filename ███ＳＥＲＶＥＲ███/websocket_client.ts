@@ -72,7 +72,7 @@ export const ws_connectWebSocket = (userId: string) => {
   //█▀█ █▄░█   █▀▀ █▀█ █▀█ █▀█ █▀█   █▀▀ █▀█ █▀█ █▀▄▀█   █▀ █▀▀ █▀█ █░█ █▀▀ █▀█
   //█▄█ █░▀█   ██▄ █▀▄ █▀▄ █▄█ █▀▄   █▀░ █▀▄ █▄█ █░▀░█   ▄█ ██▄ █▀▄ ▀▄▀ ██▄ █▀▄
   socket.onerror = (err) => {
-    console.error("⚠️ WebSocket error:", err);
+    console.warn("⚠️ WebSocket error:", err);
   };
 };
 
