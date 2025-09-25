@@ -324,7 +324,7 @@ app.delete("/recipes/:id/unlike", async (req, res) => {
 ╚═╝░░╚═╝╚══════╝░╚════╝░╚══════╝░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░ ╚═════╝░░╚════╝░░╚════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚══════╝╚═════╝░*/
 //█▀▀ █▀▀ ▀█▀   █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀
 //█▄█ ██▄ ░█░   █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█
-app.get("/users/:userId/liked", async (req, res) => {
+app.get("/users/:userId/bookmarked", async (req, res) => {
   const { userId } = req.params;
   const liked = await pool.query(
     "SELECT recipe_id FROM bookmarked_recipes WHERE user_id = $1",

@@ -185,6 +185,63 @@ export const API_unlikeRecipe = async (userId: string, recipeId: string) => {
   }
 };
 
+/*===========================================================================================================================================
+██████╗░███████╗░█████╗░███████╗████████╗░█████╗░░██████╗ ██████╗░░█████╗░░█████╗░██╗░░██╗███╗░░░███╗░█████╗░██████╗░██╗░░██╗███████╗██████╗░
+██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝ ██╔══██╗██╔══██╗██╔══██╗██║░██╔╝████╗░████║██╔══██╗██╔══██╗██║░██╔╝██╔════╝██╔══██╗
+██████╔╝█████╗░░██║░░╚═╝█████╗░░░░░██║░░░███████║╚█████╗░ ██████╦╝██║░░██║██║░░██║█████═╝░██╔████╔██║███████║██████╔╝█████═╝░█████╗░░██║░░██║
+██╔══██╗██╔══╝░░██║░░██╗██╔══╝░░░░░██║░░░██╔══██║░╚═══██╗ ██╔══██╗██║░░██║██║░░██║██╔═██╗░██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗░██╔══╝░░██║░░██║
+██║░░██║███████╗╚█████╔╝███████╗░░░██║░░░██║░░██║██████╔╝ ██████╦╝╚█████╔╝╚█████╔╝██║░╚██╗██║░╚═╝░██║██║░░██║██║░░██║██║░╚██╗███████╗██████╔╝
+╚═╝░░╚═╝╚══════╝░╚════╝░╚══════╝░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░ ╚═════╝░░╚════╝░░╚════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝╚══════╝╚═════╝░*/
+//█▀▀ █▀▀ ▀█▀   █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀ █▀▀ █▀▄   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀ █▀
+//█▄█ ██▄ ░█░   █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█ ██▄ █▄▀   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄ ▄█
+export const API_fetchBookmarkedRecipes = async (userId: string) => {
+  try {
+    const response = await fetch(`http://${API_BASE_IP}/users/${userId}/bookmarked`);
+    if (!response.ok) throw new Error("Failed to fetch liked recipes");
+    const data = await response.json();
+    console.info("(fetchBookmarkedRecipes)Fetched bookmarked recipes successfully!");
+    return data;
+  } catch (error) {
+    console.error("(fetchBookmarkedRecipes)Error:", error);
+    throw error;
+  }
+};
+//█▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
+//█▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄
+export const API_bookmarkRecipe = async (userId: string, recipeId: string) => {
+  try {
+    const response = await fetch(`http://${API_BASE_IP}/recipes/${recipeId}/bookmark`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    if (!response.ok) throw new Error("Failed to bookmark recipe");
+    const data = await response.json();
+    console.info(`(bookmarkRecipe)Recipe ${recipeId} bookmarked successfully!`);
+    return data;
+  } catch (error) {
+    console.error("(bookmarkRecipe)Error:", error);
+    throw error;
+  }
+};
+//█░█ █▄░█ █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀   █▀█ █▀▀ █▀▀ █ █▀█ █▀▀
+//█▄█ █░▀█ █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█   █▀▄ ██▄ █▄▄ █ █▀▀ ██▄
+export const API_unbookmarkRecipe = async (userId: string, recipeId: string) => {
+  try {
+    const response = await fetch(`http://${API_BASE_IP}/recipes/${recipeId}/unbookmark`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    if (!response.ok) throw new Error("Failed to unbookmark recipe");
+    const data = await response.json();
+    console.info(`(unbookmarkRecipe)Recipe ${recipeId} unbookmark successfully!`);
+    return data;
+  } catch (error) {
+    console.error("(unbookmarkRecipe)Error:", error);
+    throw error;
+  }
+};
 //=================================
 //░█████╗░██╗░░██╗░█████╗░████████╗
 //██╔══██╗██║░░██║██╔══██╗╚══██╔══╝

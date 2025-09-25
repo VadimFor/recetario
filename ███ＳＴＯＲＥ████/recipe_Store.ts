@@ -1,6 +1,6 @@
 import { Recipe, RecipeImage } from "@/props/props";
 import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
-import { API_addRecipePictures, API_createRecipe, API_deleteRecipe, API_editRecipe, API_fetchLikedRecipes, API_fetchRecipes, API_fetchUserRecipes, API_likeRecipe, API_unlikeRecipe } from "@/ＡＰＩ_ＣＡＬＬＳ";
+import { API_addRecipePictures, API_bookmarkRecipe, API_createRecipe, API_deleteRecipe, API_editRecipe, API_fetchBookmarkedRecipes, API_fetchLikedRecipes, API_fetchRecipes, API_fetchUserRecipes, API_likeRecipe, API_unbookmarkRecipe, API_unlikeRecipe } from "@/ＡＰＩ_ＣＡＬＬＳ";
 import * as ImagePicker from "expo-image-picker";
 import { create } from "zustand";
 
@@ -20,6 +20,10 @@ type RecipeStore = {
   clear_user_recipes: () => void;
   addRecipePictures: (recipeId: string, imageUris: string[]) => void;
   pickImagesFromGallery: () => Promise<string[]>
+
+  fetchUserBookmarkedRecipes: (userId: string) => Promise<void>;
+  toggleBookmark: (recipeId: string) => Promise<void>;
+
 };
 
 export const useRecipeStore = create<RecipeStore>((set, get) => ({
@@ -144,6 +148,74 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
     });
     } catch (err) {
       console.error("Error fetching liked recipes", err);
+    }
+  },
+
+  //█▀█ █▀▀ █▀▀ █▀▀ ▀█▀ ▄▀█ █▀   █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀ █▀▀ █▀▄
+  //█▀▄ ██▄ █▄▄ ██▄ ░█░ █▀█ ▄█   █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█ ██▄ █▄▀
+  fetchUserBookmarkedRecipes: async (userId: string) => {
+    try {
+      const bookmarked_recipes = await API_fetchBookmarkedRecipes(userId);
+      const bookmarkedIds = new Set(bookmarked_recipes.map((r: { recipe_id: string }) => r.recipe_id));
+
+    set({
+      recipes: get().recipes.map(r => {
+        const wasBookmarked = r.bookmarked; // estado anterior
+        const isBookmarkedNow = bookmarkedIds.has(r.id);
+
+        //PARA DEBUG
+        //if (!wasLiked && isLikedNow) {
+        //  console.log(`Receta marcada como favorita (carga inicial): ${r.id} - ${r.title}`);
+        //}
+
+        return {
+          ...r,
+          bookmarked: isBookmarkedNow,
+        };
+      })
+    });
+    } catch (err) {
+      console.error("Error fetching bookmarked recipes", err);
+    }
+  },
+
+  //▀█▀ █▀█ █▀▀ █▀▀ █░░ █▀▀   █▄▄ █▀█ █▀█ █▄▀ █▀▄▀█ ▄▀█ █▀█ █▄▀
+  //░█░ █▄█ █▄█ █▄█ █▄▄ ██▄   █▄█ █▄█ █▄█ █░█ █░▀░█ █▀█ █▀▄ █░█
+  toggleBookmark: async (recipeId: string) => {
+    const { recipes } = get();
+    const { user } = useAuthStore.getState();
+    if (!user?.id) return;
+
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (!recipe) return;
+
+    const newBookmarked = !recipe.bookmarked;
+
+    // Update UI optimistically
+    set({
+      recipes: recipes.map(r =>
+        r.id === recipeId
+          ? { ...r, bookmarked: newBookmarked}
+          : r
+      )
+    });
+
+    try {
+      if (newBookmarked) {
+        await API_bookmarkRecipe(String(user.id), recipeId);
+      } else {
+        await API_unbookmarkRecipe(String(user.id), recipeId);
+      }
+    } catch (err) {
+      console.error("Error setting bookmark status", err);
+      // rollback
+      set({
+        recipes: recipes.map(r =>
+          r.id === recipeId
+            ? { ...r, bookmarked: !newBookmarked }
+            : r
+        )
+      });
     }
   },
 
