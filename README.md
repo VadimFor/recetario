@@ -1,4 +1,4 @@
-# 📱 Recetario
+# 📱 Recetario (in progress...)
 ![Progress Screenshot](assets/phone.png)
 
 ## 🚀 Project Overview
@@ -17,6 +17,9 @@ The main goal is to create a platform for **social interactions** around cooking
    ![Progress Screenshot](assets/adminer.png)
   - Android Studio for device visualization & debugging
   - Supabase S3 for images storage.
+    ![Progress Screenshot](assets/supa.png)
+  -Node.js & Express for the API.
+    ![Progress Screenshot](assets/node.png)
 
 ## 📂 Features 
 - User authentication
