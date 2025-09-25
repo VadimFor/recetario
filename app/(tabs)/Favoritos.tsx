@@ -2,17 +2,20 @@ import RecipeList from "@/components/RecipeList";
 import { useAuthStore } from "@/███ＳＴＯＲＥ████/auth_Store";
 import { useRecipeStore } from "@/███ＳＴＯＲＥ████/recipe_Store";
 import * as NavigationBar from "expo-navigation-bar";
-import React, { useEffect } from "react";
+import { Bookmark, Heart } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import PagerView from "react-native-pager-view";
 
 const Favoritos = () => {
   const { user } = useAuthStore();
   const { fetchAllRecipes, fetchUserLikedRecipes } = useRecipeStore();
 
-  //█░█ █▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ ▀█▀
-  //█▄█ ▄█ ██▄ ██▄ █▀░ █▀░ ██▄ █▄▄ ░█░
+  const [page, setPage] = useState(0); // 0 = Liked, 1 = Bookmarked
+  const pagerRef = useRef<PagerView>(null);
+
   useEffect(() => {
-    let cancelled = false; //LOADING GUARD: Para que no se cargue doble
+    let cancelled = false;
 
     const init = async () => {
       NavigationBar.setVisibilityAsync("hidden");
@@ -28,13 +31,7 @@ const Favoritos = () => {
     };
   }, [user?.id]);
 
-  //============================================================================================================
-  //█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█
-  //█▀▄ ██▄ ░█░ █▄█ █▀▄ █░▀█
-  //============================================================================================================
   if (!user?.id) {
-    //█▄░█ █▀█ ▀█▀   █░░ █▀█ █▀▀ █▀▀ █▀▀ █▀▄   █ █▄░█
-    //█░▀█ █▄█ ░█░   █▄▄ █▄█ █▄█ █▄█ ██▄ █▄▀   █ █░▀█
     return (
       <View className="flex-1 justify-center items-center p-5 bg-white">
         <Text className="text-2xl font-bold mb-2.5 text-gray-800 text-center">
@@ -51,18 +48,84 @@ const Favoritos = () => {
       </View>
     );
   }
-  //█░░ █▀█ █▀▀ █▀▀ █▀▀ █▀▄   █ █▄░█
-  //█▄▄ █▄█ █▄█ █▄█ ██▄ █▄▀   █ █░▀█
+
   return (
     <View className="flex-1 bg-gray-100">
-      <View className="bg-red-500 pt-10 px-5">
+      {/* Header */}
+      <View className="bg-red-500 pt-10 px-5 pb-4">
         <Text className="text-white text-3xl font-bold">Favoritos</Text>
       </View>
-      <RecipeList
-        filter={(recipe) => recipe.red_hearth} // ✅ Only show liked recipes
-        isFavTab={true}
-        recipes={[]}
-      />
+
+      {/* Buttons Bar */}
+      <View className="flex-row bg-white shadow-sm">
+        {/* Liked Button */}
+        <TouchableOpacity
+          onPress={() => pagerRef.current?.setPage(0)}
+          className={`w-1/2 py-3 flex-row justify-center items-center space-x-2 ${
+            page === 0 ? "bg-red-500" : "bg-red-200"
+          }`}
+        >
+          <Heart
+            size={20}
+            color={page === 0 ? "white" : "black"}
+            fill={page === 0 ? "white" : "none"}
+          />
+          <Text
+            className={`font-semibold pl-1 text-xl ${
+              page === 0 ? "text-white" : "text-gray-700"
+            }`}
+          >
+            Liked
+          </Text>
+        </TouchableOpacity>
+
+        {/* Bookmarked Button */}
+        <TouchableOpacity
+          onPress={() => pagerRef.current?.setPage(1)}
+          className={`w-1/2 py-3 flex-row justify-center items-center space-x-2 ${
+            page === 1 ? "bg-red-500" : "bg-red-200"
+          }`}
+        >
+          <Bookmark
+            size={20}
+            color={page === 1 ? "white" : "black"}
+            fill={page === 1 ? "white" : "none"}
+          />
+          <Text
+            className={`font-semibold pl-1 text-xl ${
+              page === 1 ? "text-white" : "text-gray-700"
+            }`}
+          >
+            Bookmarked
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Pager View */}
+      <PagerView
+        ref={pagerRef}
+        style={{ flex: 1 }}
+        initialPage={0}
+        onPageSelected={(e) => setPage(e.nativeEvent.position)}
+      >
+        {/* Page 1: Liked Recipes */}
+        <View key="1" className="flex-1">
+          <RecipeList
+            filter={(recipe) => recipe.red_hearth}
+            isFavTab={true}
+            recipes={[]}
+          />
+        </View>
+
+        {/* Page 2: Bookmarked Recipes */}
+        <View key="2" className="flex-1">
+          <RecipeList
+            filter={(recipe) => recipe.bookmarked}
+            isFavTab={true}
+            recipes={[]}
+          />
+        </View>
+      </PagerView>
     </View>
   );
 };

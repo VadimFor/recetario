@@ -12,12 +12,13 @@ const RecipeCard_HOME_SOCIAL = ({
   username,
   likes,
   comments,
-  shares,
+  bookmarked,
   red_hearth,
   user_avatar,
   recipe_images,
 }: Recipe) => {
   const toggleLike = useRecipeStore((state) => state.toggleLike);
+  const toggleBookmark = useRecipeStore((state) => state.toggleBookmark);
 
   //console.log("username: ", username, "user_avatar: ", user_avatar);
 
@@ -99,9 +100,17 @@ const RecipeCard_HOME_SOCIAL = ({
         {/* Right: Bookmark + Like */}
         <View className="flex-row items-center space-x-4">
           {/* Bookmark*/}
-          <TouchableOpacity className="relative">
+          <TouchableOpacity
+            className="relative"
+            onPress={() => toggleBookmark(id)}
+          >
             <View style={{ transform: [{ scaleX: 1.3 }] }}>
-              <Bookmark size={36} strokeWidth={1.5} color="black" />
+              <Bookmark
+                size={36}
+                strokeWidth={1.5}
+                color="black"
+                fill={bookmarked ? "#3B82F6" : "transparent"}
+              />
             </View>
           </TouchableOpacity>
 

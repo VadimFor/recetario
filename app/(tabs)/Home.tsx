@@ -7,7 +7,8 @@ import { Text, View } from "react-native";
 
 export default function Index() {
   const { user, isLoading } = useAuthStore();
-  const { fetchAllRecipes, fetchUserLikedRecipes } = useRecipeStore();
+  const { fetchAllRecipes, fetchUserLikedRecipes, fetchUserBookmarkedRecipes } =
+    useRecipeStore();
 
   //█░█ █▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ █▀▀ ▀█▀
   //█▄█ ▄█ ██▄ ██▄ █▀░ █▀░ ██▄ █▄▄ ░█░
@@ -47,6 +48,7 @@ export default function Index() {
   useEffect(() => {
     if (!user?.id) return;
     fetchUserLikedRecipes(String(user.id));
+    fetchUserBookmarkedRecipes(String(user.id));
     console.log("fetch liked recipes llamado en home.tsx");
   }, [user?.id]);
 
