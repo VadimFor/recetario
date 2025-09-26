@@ -68,7 +68,7 @@ const Favoritos = () => {
             fill={page === 0 ? "red" : "none"}
           />
           <Text
-            className={`ml-2 text-xl ${page === 0 ? "text-red-500" : "text-gray-700"}`}
+            className={`ml-2 text-xl font-bold  ${page === 0 ? "text-red-500" : "text-gray-700"}`}
           >
             Liked
           </Text>
@@ -81,10 +81,10 @@ const Favoritos = () => {
           <Bookmark
             size={20}
             color={page === 1 ? "black" : "gray"}
-            fill={page === 1 ? "blue" : "none"}
+            fill={page === 1 ? "#3B82F6" : "none"}
           />
           <Text
-            className={`ml-2 text-xl ${page === 1 ? "text-red-500" : "text-gray-700"}`}
+            className={`ml-2 text-xl font-bold ${page === 1 ? "text-blue-500" : "text-red-500"}`}
           >
             Bookmarked
           </Text>
@@ -92,7 +92,7 @@ const Favoritos = () => {
 
         {/* Underline */}
         <View
-          className="absolute bottom-0 h-0.5 bg-red-500"
+          className={`absolute bottom-0 h-0.5 ${page === 1 ? "bg-blue-500" : "bg-red-500"}`}
           style={{
             width: "50%",
             left: `${page * 50}%`,
