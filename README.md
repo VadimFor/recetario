@@ -1,4 +1,4 @@
-# 📱 Recetario (in progress...)
+# 📱 Recetario (in progress...) [developed for react native learning purposes]
 ![Progress Screenshot](assets/phone.png)
 
 ## 🚀 Project Overview
