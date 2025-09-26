@@ -15,12 +15,12 @@ The main goal is to create a platform for **social interactions** around cooking
 - **Development Environment:**
 - Windows 11 with **VS Code**
 - WSL (Windows Subsystem for Linux) for running PostgreSQL + Adminer
-   ![Progress Screenshot](assets/cmd.png)
+  ![Progress Screenshot](assets/cmd.png)
 - Android Studio for device visualization & debugging
 - Supabase S3 for images storage.
-    ![Progress Screenshot](assets/supa.png)
+  ![Progress Screenshot](assets/supa.png)
 - Node.js & Express for the API.
-    ![Progress Screenshot](assets/node.png)
+  ![Progress Screenshot](assets/node.png)
 
 ## 📂 Features 
 - User authentication
