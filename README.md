@@ -9,16 +9,17 @@ The main goal is to create a platform for **social interactions** around cooking
 - **Frontend:** React Native with Expo
 - **State Management:** Zustand
 - **Database:** PostgreSQL
+  ![Progress Screenshot](assets/db_schema.png)
 - **Database Browser:** Adminer
+  ![Progress Screenshot](assets/adminer.png)
 - **Development Environment:**
-  - Windows 11 with **VS Code**
-  - WSL (Windows Subsystem for Linux) for running PostgreSQL + Adminer
+- Windows 11 with **VS Code**
+- WSL (Windows Subsystem for Linux) for running PostgreSQL + Adminer
    ![Progress Screenshot](assets/cmd.png)
-   ![Progress Screenshot](assets/adminer.png)
-  - Android Studio for device visualization & debugging
-  - Supabase S3 for images storage.
+- Android Studio for device visualization & debugging
+- Supabase S3 for images storage.
     ![Progress Screenshot](assets/supa.png)
-  -Node.js & Express for the API.
+-Node.js & Express for the API.
     ![Progress Screenshot](assets/node.png)
 
 ## 📂 Features 
