@@ -3,20 +3,15 @@ import { WebSocketServer } from "ws";
 
 //█▀▀ █░░ █▀█ █▄▄ ▄▀█ █░░   █░█ ▄▀█ █▀█ █ ▄▀█ █▄▄ █░░ █▀▀ █▀
 //█▄█ █▄▄ █▄█ █▄█ █▀█ █▄▄   ▀▄▀ █▀█ █▀▄ █ █▀█ █▄█ █▄▄ ██▄ ▄█
-// {chat_id : cliente1,cliente2,cliente3}
 //este map contendrá el chat id y los clientes conectados a ese chat id
 const GLOBAL_chat_and_Subscribers = new Map(); //{ {chatId_1 : clientSocket1, clientSocket2, ...}, {chatId_2 : clientSocket2}, ... }
 const GLOBAL_userid_of_Sockets = new Map(); // { userId : clientSocket }
 
 export const PORT = 3002;
 
-// Create WebSocket server on port 3001
 const webSocketServer = new WebSocketServer({ port: PORT });
 
-// IMPORTANTE==================================================================================
-//Cuando un cliente se conecta al servidor websocket esta función lo maneja personalmente.
-//Por eso podemos tener variables "locales" como subscribedChatIds, ya que cada cliente tendrá su propia copia de esa variable.
-//=============================================================================================
+//cada cliente tiene sus variables locales.
 webSocketServer.on("connection", (clientSocket) => {
   console.log("New client connected");
 

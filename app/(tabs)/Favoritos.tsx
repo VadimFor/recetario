@@ -56,50 +56,48 @@ const Favoritos = () => {
       <View className="bg-red-500 pt-10 px-5 pb-4">
         <Text className="text-white text-3xl font-bold">Favoritos</Text>
       </View>
-
       {/* Buttons Bar */}
-      <View className="flex-row bg-white shadow-sm">
-        {/* Liked Button */}
+      <View className="relative flex-row bg-white shadow-sm">
         <TouchableOpacity
           onPress={() => pagerRef.current?.setPage(0)}
-          className={`w-1/2 py-3 flex-row justify-center items-center space-x-2 ${
-            page === 0 ? "bg-red-500" : "bg-grey-200"
-          }`}
+          className="w-1/2 py-3 flex-row justify-center items-center"
         >
           <Heart
             size={20}
-            color={page === 0 ? "white" : "black"}
-            fill={page === 0 ? "white" : "none"}
+            color={page === 0 ? "black" : "gray"}
+            fill={page === 0 ? "red" : "none"}
           />
           <Text
-            className={`font-semibold pl-1 text-xl ${
-              page === 0 ? "text-white" : "text-gray-700"
-            }`}
+            className={`ml-2 text-xl ${page === 0 ? "text-red-500" : "text-gray-700"}`}
           >
             Liked
           </Text>
         </TouchableOpacity>
 
-        {/* Bookmarked Button */}
         <TouchableOpacity
           onPress={() => pagerRef.current?.setPage(1)}
-          className={`w-1/2 py-3 flex-row justify-center items-center space-x-2 ${
-            page === 1 ? "bg-red-500" : "bg-grey-200"
-          }`}
+          className="w-1/2 py-3 flex-row justify-center items-center"
         >
           <Bookmark
             size={20}
-            color={page === 1 ? "white" : "black"}
-            fill={page === 1 ? "white" : "none"}
+            color={page === 1 ? "black" : "gray"}
+            fill={page === 1 ? "blue" : "none"}
           />
           <Text
-            className={`font-semibold pl-1 text-xl ${
-              page === 1 ? "text-white" : "text-gray-700"
-            }`}
+            className={`ml-2 text-xl ${page === 1 ? "text-red-500" : "text-gray-700"}`}
           >
             Bookmarked
           </Text>
         </TouchableOpacity>
+
+        {/* Underline */}
+        <View
+          className="absolute bottom-0 h-0.5 bg-red-500"
+          style={{
+            width: "50%",
+            left: `${page * 50}%`,
+          }}
+        />
       </View>
 
       {/* Pager View */}
