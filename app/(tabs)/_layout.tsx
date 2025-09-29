@@ -111,6 +111,20 @@ const index = () => {
         }}
       />
       <Tabs.Screen
+        name="Feedback"
+        options={{
+          title: "Feedback",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="lightbulb-on"
+              color={color}
+              size={iconSize}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="Perfil"
         options={{
           title: user?.id ? "Perfil" : "Login",
